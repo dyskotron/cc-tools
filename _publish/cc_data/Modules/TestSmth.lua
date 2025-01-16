@@ -26,78 +26,577 @@ function InventoryWrapper.init()
 end
 
 function InventoryWrapper.getItemAt(slot)
-    if slot < 1 or slot Mˆ[‚ˆš[
-’[˜[YÛÝ[X™\‹ˆ]\Ý™H™]ÙY[ˆH[™M‹ˆŠBˆ™]\›ˆš[ˆ[™‚ˆ™]\›ˆ[™[ÜžVÜÛÝB™[™‚™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹œš[[™[ÜžJ
-Bˆš[
-’[™[ÜžHÛÛ[ÎˆŠBˆ›ÜˆÛÝ][H[ˆZ\œÊ[™[ÜžJHÂˆYˆ][H[‚ˆš[
-][K›˜[YH‹ˆŠˆ‹ˆ][K˜ÛÝ[‹ˆŠHŠBˆ[™ˆ[™™[™‚™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹œš[Ú[Ù\œÊ
-Bˆš[
-’[™[ÜžHÛÛ[ÎˆŠBˆ›ÜˆÛÝ][H[ˆZ\œÊ[™[ÜžJHÂˆYˆ][H[‚ˆYˆ][KœÚ[Ù\’][H[‚ˆš[
-][K›˜[YH‹ˆŠˆ‹ˆ][KœÚ[Ù\’][H‹ˆŠHŠBˆ[™ˆ[™ˆ[™™[™‚‹KHÙ]Hš\œÝ[\HÛÝ^ÛY[™ÈH™\Ù\™YÛÝ™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹™Ù][\TÛÝ
-^ÛYJBˆKH]\˜]HÝ™\ˆH[™[ÜžHÛÝÂˆ›ÜˆÛÝHKMˆÂˆKHÚXÚÈYˆHÛÝ\È[\H[™›ÝH^ÛYY™\Ù\™YÛÝˆYˆ›Ý[™[ÜžVÜÛÝH[™ÛÝH^ÛYH[‚ˆ™]\›ˆÛÝˆ[™ˆ[™ˆ™]\›ˆš[KH™]\›ˆš[Yˆ›È[\HÛÝ\È›Ý[™™[™‚™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹™Ù]Ú[Ù\’][S˜[YJÛÝ
-BˆKHÚXÚÈYˆHÛÝ^\ÝÈ[ˆH[™[ÜžH[™ÛÛZ[œÈHÚ[Ù\‚ˆØØ[][HH[™[ÜžVÜÛÝBˆYˆ][H[™][KœÚ[Ù\’][H[‚ˆ™]\›ˆ][KœÚ[Ù\’][HKH™]\›ˆH˜[YHÙˆH][H[œÚYHHÚ[Ù\‚ˆ[ÙBˆ™]\›ˆš[KH›ÈÚ[Ù\ˆ][H[ˆHÛÝˆ[™™[™‚‹KHÙ[XÝHÛÝÛÛZ[š[™ÈHÜXÚYšYY][KÜ[Û˜[HØY[™Èœ›ÛHÚ[Ù\ˆ›Þ\Â™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹œÙ[XÝ
-][S˜[YKžSØYœ›ÛTÚ[Ù\ŠBˆKHš\œÝÚXÚÈH[™[ÜžH›ÜˆH][Bˆ›ÜˆÛÝ][H[ˆZ\œÊ[™[ÜžJHÂˆYˆ][K›˜[YHOH][S˜[YH[‚ˆYˆÛÝHÙ[XÝYÛÝ[‚ˆ\KœÙ[XÝ
-ÛÝ
-BˆÙ[XÝYÛÝHÛÝˆ[™ˆÙÙÙ\‹›ÙÊ’[™[ÜžUÜ˜\\‹œÙ[XÝ
+    if slot < 1 or slot > 16 then
+        print("Invalid slot number. Must be between 1 and 16.")
+        return nil
+    end
 
-H›Ý[™][Hˆ‹ˆ][S˜[YH‹ˆˆ\™XÝH[ˆ[™[ÜžHŠBˆ™]\›ˆYBˆ[™ˆ[™‚ˆKHYˆH][H\È›Ý›Ý[™[™žSØYœ›ÛTÚ[Ù\ˆ\ÈYKØYœ›ÛHÚ[Ù\‚ˆYˆžSØYœ›ÛTÚ[Ù\ˆ[‚ˆÙÙÙ\‹›ÙÊ’[™[ÜžUÜ˜\\‹œÙ[XÝ
+    return inventory[slot]
+end
 
-HžZ[™ÈÈØYˆ‹ˆ][S˜[YH‹ˆˆœ›ÛHÚ[Ù\ˆŠBˆYˆ[™[ÜžUÜ˜\\‹žSØYœ›ÛTÚ[Ù\Š][S˜[YJH[‚ˆKH™]žHÙ[XÝ[™ÈH][HY\ˆØY[™ÂˆÙÙÙ\‹›ÙÊ’[™[ÜžUÜ˜\\‹œÙ[XÝ
+function InventoryWrapper.printInventory()
+    print("Inventory Contents:")
+    for slot, item in pairs(inventory) do
+        if item then
+            print(item.name .. "(" .. item.count .. ")")
+        end
+    end
+end
 
-H™]žHÙ[XÝ[™Èˆ‹ˆ][S˜[YH‹ˆˆY\ˆÝXÙ\Ù[ØY[™ÈŠBˆ™]\›ˆ[™[ÜžUÜ˜\\‹œÙ[XÝ
-][S˜[YK˜[ÙJBˆ[™ˆ[™‚ˆKH][H›Ý›Ý[™[ˆ[™[ÜžHÜˆÚ[Ù\ˆ›Þ\Âˆ™]\›ˆ˜[ÙB™[™‚‹KHØY][\ÈÙˆHÜXÚYšXÈ\Hœ›ÛHHÚ[Ù\ˆ›Þ™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹žSØYœ›ÛTÚ[Ù\Š][S˜[YJBˆKHš\œÝÚXÚÈÛÛ™š\›YYÚ[Ù\œÂˆ›ÜˆÛÝ][H[ˆZ\œÊ[™[ÜžJHÂˆYˆ][K›˜[YN™š[™
-œÚ[Ù\—Ø›ÞŠH[™][KœÚ[Ù\’][HOH][S˜[YH[™][KœÚ[Ù\”ÝXÚÜÈˆ[‚ˆKHÚ[Ù\ˆÛÛ™š\›YYXÙH]ÝXÚÈH][K[™YÈ]˜XÚÂˆÙÙÙ\‹›ÙÊ’[™[ÜžUÜ˜\\‹œÙ[XÝ
+function InventoryWrapper.printShulkers()
+    print("Inventory Contents:")
+    for slot, item in pairs(inventory) do
+        if item then
+            if item.shulkerItem then
+                print(item.name .. "(" .. item.shulkerItem .. ")")
+            end
+        end
+    end
+end
 
-H›Ý[™][Hˆ‹ˆ][S˜[YH‹ˆˆ[ˆÚ[Ù\ˆ›ÞŠBˆ™]\›ˆ[™[ÜžUÜ˜\\‹œXÙP[™›ØÙ\ÜÔÚ[Ù\ŠÛÝÒ[™[ÜžUÜ˜\\‹œÝXÚÕ\JBˆ[™ˆ[™‚ˆKHYˆ][H›Ý›Ý[™^š[HÚXÚÈ[˜ÛÛ™š\›YYÚ[Ù\œÂˆ›ÜˆÛÝ][H[ˆZ\œÊ[™[ÜžJHÂˆYˆ][K›˜[YN™š[™
-œÚ[Ù\—Ø›ÞŠH[™›Ý][KœÚ[Ù\’][H[‚ˆÙÙÙ\‹›ÙÊ’[™[ÜžUÜ˜\\‹œÙ[XÝ
+-- Get the first empty slot, excluding the reserved slot
+function InventoryWrapper.getEmptySlot(exclude)
+    -- Iterate over the inventory slots
+    for slot = 1, 16 do
+        -- Check if the slot is empty and not the excluded reserved slot
+        if not inventory[slot] and slot ~= exclude then
+            return slot
+        end
+    end
+    return nil -- Return nil if no empty slot is found
+end
 
-HÚXÚÚ[™ÈÚ[Ù\ˆ›ÞŠBˆYˆ[™[ÜžUÜ˜\\‹œXÙP[™›ØÙ\ÜÔÚ[Ù\ŠÛÝÒ[™[ÜžUÜ˜\\‹š[š]Ú[Ù\‘]K[™[ÜžUÜ˜\\‹˜ÚXÚÑ›Ü’][K[™[ÜžUÜ˜\\‹œÝXÚÕ\K][S˜[YJH[ˆKH™YYÈYH^˜H\˜[H\™Bˆ™]\›ˆYBˆ[™ˆ[™ˆ[™‚ˆ™]\›ˆ˜[ÙHKH›ÈX]Ú[™ÈÚ[Ù\ˆ›Þ›Ý[™™[™‚™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹œXÙP[™›ØÙ\ÜÔÚ[Ù\ŠÚ[Ù\”ÛÝY]ÙËY]Q]JB‚ˆ[™[ÜžUÜ˜\\‹œÙ[XÝÛÝ
-Ú[Ù\”ÛÝ
-B‚ˆYˆ›Ý\K™]XÝ\
+function InventoryWrapper.getShulkerItemName(slot)
+    -- Check if the slot exists in the inventory and contains a shulker
+    local item = inventory[slot]
+    if item and item.shulkerItem then
+        return item.shulkerItem -- Return the name of the item inside the shulker
+    else
+        return nil -- No shulker item in the slot
+    end
+end
 
-HÜˆ\K™YÕ\
+-- Select a slot containing the specified item, optionally loading from shulker boxes
+function InventoryWrapper.select(itemName, tryLoadFromShulker)
+    -- First, check the inventory for the item
+    for slot, item in pairs(inventory) do
+        if item.name == itemName then
+            if slot ~= selectedSlot then
+                turtle.select(slot)
+                selectedSlot = slot
+            end
+            logger.log("InventoryWrapper.select() found item " .. itemName .. " directly in inventory")
+            return true
+        end
+    end
 
-H[‚ˆYˆ›Ý\KœXÙU\
+    -- If the item is not found and tryLoadFromShulker is true, load from shulker
+    if tryLoadFromShulker then
+        logger.log("InventoryWrapper.select() trying to load " .. itemName .. " from shulker")
+        if InventoryWrapper.tryLoadFromShulker(itemName) then
+            -- Retry selecting the item after loading
+            logger.log("InventoryWrapper.select() Retry selecting  " .. itemName .. " after sucesfull loading")
+            return InventoryWrapper.select(itemName, false)
+        end
+    end
 
-H[‚ˆš[
-•[˜X›HÈXÙHÚ[Ù\ˆ›ÞŠBˆ™]\›ˆ˜[ÙBˆ[™ˆ[™‚ˆØØ[[Y]ÙÔÝXÙYYYHYB‚ˆØØ[ÛÛ[YT›ØÙ\ÜÚ[™ÈHYHKH›YÈÈ˜XÚÈYˆ›ØÙ\ÜÚ[™ÈÚÝ[ÛÛ[YBˆ›ÜˆËY]Ù[ˆ\Z\œÊY]ÙÊHÂˆØØ[ÝXØÙ\ÜÈHY]Ù
-Ú[Ù\”ÛÝY]Q]JBˆYˆ›ÝÝXØÙ\ÜÈ[‚ˆš[
-“Y]Ù˜Z[YÚÚ\[™È\\ˆY]ÙËˆŠBˆ[Y]ÙÔÝXÙYYYH˜[ÙBˆœ™XZÂˆ[™ˆ[™‚ˆ[™[ÜžUÜ˜\\‹œÙ[XÝÛÝ
-Ú[Ù\”ÛÝ
-Bˆ\K™YÕ\
+    -- Item not found in inventory or shulker boxes
+    return false
+end
 
-Bˆ™]\›ˆ[Y]ÙÔÝXÙYYY™[™‚™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹˜ÚXÚÑ›Ü’][JÚ[Ù\”ÛÝ\™Ù]][JBˆÙÙÙ\‹›ÙÊ’[™[ÜžUÜ˜\\‹˜ÚXÚÑ›Ü’][J
-HÚXÚÚ[™ÈÚ[Ù\ˆÛÛ[ˆˆ‹ˆ[™[ÜžUÜ˜\\‹™Ù]Ú[Ù\’][S˜[YJÚ[Ù\”ÛÝ
-H‹ˆ\™Ù]][H\Èˆ‹ˆ\™Ù]][JBˆ™]\›ˆ[™[ÜžUÜ˜\\‹™Ù]Ú[Ù\’][S˜[YJÚ[Ù\”ÛÝ
-HOH\™Ù]][B™[™‚™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹œÝXÚÕ\
-Ú[Ù\”ÛÝ
-B‚ˆØØ[][TÛÝH[™[ÜžUÜ˜\\‹™Ù][\TÛÝ
-Ú[Ù\”ÛÝ
-Bˆ[™[ÜžUÜ˜\\‹œÙ[XÝÛÝ
-][TÛÝ
-BˆKHÝXÚÈH][\Èœ›ÛHHÚ[Ù\ˆ›ÞˆYˆ\KœÝXÚÕ\
+-- Load items of a specific type from a shulker box
+function InventoryWrapper.tryLoadFromShulker(itemName)
+    -- First, check confirmed shulkers
+    for slot, item in pairs(inventory) do
+        if item.name:find("shulker_box") and item.shulkerItem == itemName and item.shulkerStacks > 0 then
+            -- Shulker confirmed, place it, suck the item, and dig it back
+            logger.log("InventoryWrapper.select() found item " .. itemName .. " in shulker box")
+            return InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.suckUp})
+        end
+    end
 
-H[‚ˆ[™[ÜžUÜ˜\\‹\]TÛÝ
-][TÛÝ
-Bˆ[ÙBˆÙÙÙ\‹›ÙÊ˜Ø[ÝXÚÈœ›ÛHÚ[Ù\ˆŠBˆ[™‚ˆ™]\›ˆYB™[™‚‚™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹Ü˜\Ú[Ù\•Ú]™]žJX^™]šY\Ë[^JBˆØØ[™]šY\ÈHˆØØ[Ú[Ù\ˆHš[‚ˆÚ[H™]šY\ÈX^™]šY\ÈÂˆÚ[Ù\ˆH\š\\˜[Ü˜\
-ÜŠHKH][\ÈÜ˜\HÚ[Ù\ˆ›ÞˆYˆÚ[Ù\ˆ[‚ˆ™]\›ˆÚ[Ù\ˆKHÝXØÙ\ÜÙ[HÜ˜\YHÚ[Ù\ˆ›Þˆ[™‚ˆ™]šY\ÈH™]šY\È
-ÈBˆÛY\
-[^JHKHØZ]™Y›Ü™H™]žZ[™Âˆ[™‚ˆš[
-‘˜Z[YÈÜ˜\HÚ[Ù\ˆ›ÞY\ˆˆ‹ˆX^™]šY\È‹ˆˆ™]šY\ËˆŠBˆ™]\›ˆš[KH™]\›ˆš[YˆÜ˜\[™È˜Z[Â™[™‚™[˜Ý[Ûˆ[™[ÜžUÜ˜\\‹š[š]Ú[Ù\‘]JÚ[Ù\”ÛÝ
-B‚ˆÙÙÙ\‹›ÙÊ’[™[ÜžUÜ˜\\‹š[š]Ú[Ù\‘]J
-H›Ý[™][H[ˆÚ[Ù\ˆH\][™È[™[ÜžH]HŠBˆKHÜ˜\HÚ[Ù\ˆ›Þ\ÈH\š\\˜[ˆK[ØØ[Ú[Ù\ˆH\š\\˜[Ü˜\
-ÜŠBˆØØ[Ú[Ù\ˆH[™[ÜžUÜ˜\\‹Ü˜\Ú[Ù\•Ú]™]žJLJBˆYˆ›ÝÚ[Ù\ˆ[‚ˆš[
-Ø[‰ÝÜ˜\XÙYÚ[Ù\ˆŠBˆš[
-ÜÝš[™Ê\š\\˜[™Ù]˜[Y\Ê
-JJBˆš[
-\š\\˜[™Ù]\JÜŠJBˆš[
-Ü\š\\˜[™Ù]˜[Y\Ê
-JBˆš[
-Y[KX›UÔÝš[™Ê\š\\˜[™Ù]˜[Y\Ê
-K[™[
-JBˆ^]
+    -- If item not found, lazily check unconfirmed shulkers
+    for slot, item in pairs(inventory) do
+        if item.name:find("shulker_box") and not item.shulkerItem then
+            logger.log("InventoryWrapper.select() checking shulker box")
+            if InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.initShulkerData, InventoryWrapper.checkForItem, InventoryWrapper.suckUp}, itemName) then -- need to add the extra param here
+                return true
+            end
+        end
+    end
 
-Bˆ™]\›ˆ˜[ÙHKH˜Z[YÈÜ˜\HÚ[Ù\ˆ›Þˆ[™‚ˆKH[š]X[^™H[ÝXÚÜÈÛÝ[\‚ˆØØ[[ÝXÚÜÈHˆØØ[][S˜[YHH™[\H‚‚ˆKH]\˜]H›ÝYÚHÛÛ[ÈÙˆHÚ[Ù\ˆ›ÞˆØØ[ÛÛ[ÈHÚ[Ù\‹›\Ý
+    return false -- No matching shulker box found
+end
 
-B‚ˆ›ÜˆËÝXÚÈ[ˆZ\œÊÛÛ[ÊHÂˆKHYˆ\™H\È[žH][H[ˆHÝXÚË[˜Ü™[Y[H[ÝXÚÜÈÛÝ[\‚ˆYˆÝXÚË˜ÛÝ[ˆ[‚ˆ[ÝXÚÜÈH[ÝXÚÜÈ
-ÈBˆ][S˜[YHHÝXÚË›˜[YBˆ[™ˆ[™‚ˆKHÛ›H\]HYˆ\™H\™H[ÝXÚÜÈ[ˆHÚ[Ù\‚ˆYˆ[ÝXÚÜÈF†Và¢ÒÒ&WG&–WfRF†R7W'&VçB—FVÒg&öÒF†R–çfVçF÷'’‡&W6W'fR—G2÷&–v–æÂæÖRæB6÷VçB¢Æö6Â7W'&VçD—FVÒÒ–çfVçF÷'•·6‡VÆ¶W%6Æ÷EÐ ¢ÒÒWFFRF†R6‡VÆ¶W$—FVÒæB6‡VÆ¶W%7F6·2f–VÆG2v†–ÆRÆVf–æræÖRæB6÷VçB–çF7@¢7W'&VçD—FVÒç6‡VÆ¶W$—FVÒÒ—FVÔæÖRÒÒæÖRg&öÒF†Rf—'7B7F6²–âF†R6‡VÆ¶W ¢7W'&VçD—FVÒç6‡VÆ¶W%7F6·2ÒgVÆÅ7F6·2ÒÒçVÖ&W"öbgVÆÂ7F6·0 ¢ÒÒWFFRF†R–çfVçF÷'’VçG'’f÷"F†R6‡VÆ¶W%6Æ÷@¢–çfVçF÷'•·6‡VÆ¶W%6Æ÷EÒÒ7W'&VçD—FVÐ¢Væ@ ¢&WGW&âG'VRÒÒ7V66W76gVÆÇ’WFFVB6‡VÆ¶W"FF¦Væ@  ¢ÒÒVç7W&R6Æ÷B6VÆV7F–öâ—2Çv—2G&6¶V@¦gVæ7F–öâ–çfVçF÷'•w&W"ç6VÆV7E6Æ÷B‡6Æ÷B¢–b6Æ÷BãÒæB6Æ÷BÃÒbF†Và¢–b6Æ÷BãÒ6VÆV7FVE6Æ÷BF†Và¢GW'FÆRç6VÆV7B‡6Æ÷B¢6VÆV7FVE6Æ÷BÒ6Æ÷@¢Væ@¢VÇ6P¢W'&÷"‚$–çfÆ–B6Æ÷BçVÖ&W#¢"ââ6Æ÷B¢Væ@¦Væ@ ¢ÒÒÆ6Râ—FVÒæBWFFR–çfVçF÷'¦gVæ7F–öâ–çfVçF÷'•w&W"çÆ6R‚¢–bGW'FÆRçÆ6R‚’F†Và¢WFFTgFW%Æ6R‚¢&WGW&âG'VP¢Væ@¢&WGW&âfÇ6P¦Væ@ ¦gVæ7F–öâ–çfVçF÷'•w&W"çÆ6TF÷vâ‚¢–bGW'FÆRçÆ6TF÷vâ‚’F†Và¢–çfVçF÷'•w&W"çWFFTgFW%Æ6R‚¢&WGW&âG'VP¢Væ@¢&WGW&âfÇ6P¦Væ@ ¦gVæ7F–öâ–çfVçF÷'•w&W"çWFFTgFW%Æ6R‚¢–b–çfVçF÷'•·6VÆV7FVE6Æ÷EÒF†Và¢–çfVçF÷'•·6VÆV7FVE6Æ÷EÒæ6÷VçBÒ–çfVçF÷'•·6VÆV7FVE6Æ÷EÒæ6÷VçBÒ¢–b–çfVçF÷'•·6VÆV7FVE6Æ÷EÒæ6÷VçBÃÒF†Và¢–çfVçF÷'•·6VÆV7FVE6Æ÷EÒÒæ–À¢Væ@¢Væ@¦Væ@ ¢ÒÒWFFR–çfVçF÷'’gFW"7V6¶–ær—FV×0¦gVæ7F–öâ–çfVçF÷'•w&W"çWFFU6Æ÷B‡6Æ÷B¢Æö6ÂFWF–Ç2ÒGW'FÆRævWD—FVÔFWF–Â‡6Æ÷B¢–bFWF–Ç2F†Và¢–b–çfVçF÷'•·6Æ÷EÒF†Và¢–çfVçF÷'•·6Æ÷EÒæ6÷VçBÒFWF–Ç2æ6÷Vç@¢VÇ6P¢–çfVçF÷'•·6Æ÷EÒÒ°¢æÖRÒFWF–Ç2ææÖRÀ¢6÷VçBÒFWF–Ç2æ6÷VçBÀ¢6‡VÆ¶W$—FVÒÒæ–ÂÀ¢6‡VÆ¶W%7F6·2ÒÀ¢Ð¢Væ@¢VÇ6P¢–çfVçF÷'•·6Æ÷EÒÒæ–À¢Væ@¦Væ@ ¢ÒÒ66W726‡VÆ¶W"&÷‚æBG&6²—G26öçFVçG0¦gVæ7F–öâ–çfVçF÷'•w&W"æ66W756‡VÆ¶W"‚¢–b–çfVçF÷'•·6VÆV7FVE6Æ÷EÒæB–çfVçF÷'•·6VÆV7FVE6Æ÷EÒææÖS¦f–æB‚'6‡VÆ¶W%ö&÷‚"’F†Và¢–bGW'FÆRçÆ6R‚’F†Và¢ÒÒ6Æ7VÆFR†÷rÖç’gVÆÂ7F6·2vW&R–ç6–FP¢Æö6Â7F6·2Ò ¢Æö6Â—FVÕG—RÒæ–À ¢f÷"6Æ÷BÒÂbFð¢Æö6ÂFWF–Ç2ÒGW'FÆRævWD—FVÔFWF–Â‡6Æ÷B¢–bFWF–Ç2F†Và¢7F6·2Ò7F6·2²¢—FVÕG—RÒFWF–Ç2ææÖP¢Væ@¢Væ@ ¢ÒÒWFFRF†R6‡VÆ¶W"&÷‚w26öçFVçG0¢–çfVçF÷'•·6VÆV7FVE6Æ÷EÒç6‡VÆ¶W$—FVÒÒ—FVÕG—P¢–çfVçF÷'•·6VÆV7FVE6Æ÷EÒç6‡VÆ¶W%7F6·2Ò7F6·0 ¢ÒÒF–rF†R6‡VÆ¶W"&÷‚&6²W ¢–bGW'FÆRæF–r‚’F†Và¢&WGW&âG'VP¢Væ@¢Væ@¢Væ@¢&WGW&âfÇ6P¦Væ@ ¢ÒÒw&W"f÷"7V6²æBF–rFòVç7W&R–çfVçF÷'’7F—2WFFV@¦gVæ7F–öâ–çfVçF÷'•w&W"ç7V6²‚¢–bGW'FÆRç7V6²‚’F†Và¢–çfVçF÷'•w&W"çWFFTgFW%7V6²‚¢&WGW&âG'VP¢Væ@¢&WGW&âfÇ6P¦Væ@ ¦gVæ7F–öâ–çfVçF÷'•w&W"æF–r‚¢–bGW'FÆRæF–r‚’F†Và¢–çfVçF÷'•w&W"çWFFTgFW%7V6²‚¢&WGW&âG'VP¢Væ@¢&WGW&âfÇ6R—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦–—V¦¦Væ@ §&WGW&â–çfVçF÷'•w&W"ÒÒ–bF†W&R—2ç’—FVÒ–âF†R7F6²Â–æ7&VÖVçBF†RgVÆÅ7F6·26÷VçFW ¢–b7F6²æ6÷VçBâF†Và¢gVÆÅ7F6·2ÒgVÆÅ7F6·2²¢—FVÔæÖRÒ7F6²ææÖP¢Væ@¢Væ@ ¢ÒÒöæÇ’WFFR–bF†W&R&RgVÆÂ7F6·2–âF†R6‡VÆ¶W ¢–bgVÆÅ7F6·2âF†Và¢ÒÒ&WG&–WfRF†R7W'&VçB—FVÒg&öÒF†R–çfVçF÷'’‡&W6W'fR—G2÷&–v–æÂæÖRæB6÷VçB¢Æö6Â7W'&VçD—FVÒÒ–çfVçF÷'•·6‡VÆ¶W%6Æ÷EÐ ¢ÒÒWFFRF†R6‡VÆ¶W$—FVÒæB6‡VÆ¶W%7F6·2f–VÆG2v†–ÆRÆVf–æræÖRæB6÷VçB–çF7@¢7W'&VçD—FVÒç6‡VÆ¶W$—FVÒÒ—FVÔæÖRÒÒæÖRg&öÒF†Rf—'7B7F6²–âF†R6‡VÆ¶W ¢7W'&VçD—FVÒç6‡VÆ¶W%7F6·2ÒgVÆÅ7F6·2ÒÒçVÖ&W"öbgVÆÂ7F6·0 ¢ÒÒWFFRF†R–çfVçF÷'’VçG'’f÷"F†R6‡VÆ¶W%6Æ÷@¢–çfVçF÷'•·6‡VÆ¶W%6Æ÷EÒÒ7W'&VçD—FVÐ¢Væ@ ¢&WGW&âG'VRÒÒ7V66W76gVÆÇ’WFFVB6‡VÆ¶W"FF¢Væ@  ¢ÒÒVç7W&R6Æ÷B6VÆV7F–öâ—2Çv—2G&6¶V@¢gVæ7F–öâ–çfVçF÷'•w&W"ç6VÆV7E6Æ÷B‡6Æ÷B¢–b6Æ÷B ô€Ä…¹Í±½Ð€ðô€ÄØÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜Í±½ÐøôÍ•±•Ñ•‘M±½ÐÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ÑÕÉÑ±”¹Í•±•Ð¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€Í•±•Ñ•‘M±½Ð€ôÍ±½Ð(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€•±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•ÉÉ½È ‰%¹Ù…±¥Í±½Ð¹Õµ‰•Èè€ˆ€¸¸Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€´´A±…”…¸¥Ñ•´…¹ÕÁ‘…Ñ”¥¹Ù•¹Ñ½Éä(€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹Á±…” ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹Á±…” ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ÕÁ‘…Ñ•™Ñ•ÉA±…” ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”(€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹Á±…•½Ý¸ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹Á±…•½Ý¸ ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•™Ñ•ÉA±…” ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”(€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•™Ñ•ÉA±…” ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½ÑtÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹½Õ¹Ð€ô¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹½Õ¹Ð€´€Ä(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹½Õ¹Ð€ðô€ÀÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt€ô¹¥°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€´´UÁ‘…Ñ”¥¹Ù•¹Ñ½Éä…™Ñ•ÈÍÕ­¥¹œ¥Ñ•µÌ(€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•M±½Ð¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°‘•Ñ…¥±Ì€ôÑÕÉÑ±”¹•Ñ%Ñ•µ•Ñ…¥°¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜‘•Ñ…¥±ÌÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜¥¹Ù•¹Ñ½ÉåmÍ±½ÑtÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ±½Ñt¹½Õ¹Ð€ô‘•Ñ…¥±Ì¹½Õ¹Ð(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ±½Ñt€ôì(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹…µ”€ô‘•Ñ…¥±Ì¹¹…µ”°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€½Õ¹Ð€ô‘•Ñ…¥±Ì¹½Õ¹Ð°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€Í¡Õ±­•É%Ñ•´€ô¹¥°°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€Í¡Õ±­•ÉMÑ…­Ì€ô€À°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€•±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ±½Ñt€ô¹¥°(€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€´´•ÍÌ„Í¡Õ±­•È‰½à…¹ÑÉ…¬¥ÑÌ½¹Ñ•¹ÑÌ(€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹…•ÍÍM¡Õ±­•È ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt…¹¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹¹…µ”é™¥¹ ‰Í¡Õ±­•É}‰½àˆ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹Á±…” ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´…±Õ±…Ñ”¡½Üµ…¹ä™Õ±°ÍÑ…­ÌÝ•É”¥¹Í¥‘”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°ÍÑ…­Ì€ô€À(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°¥Ñ•µQåÁ”€ô¹¥°((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™½ÈÍ±½Ð€ô€Ä°€ÄØ‘¼(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°‘•Ñ…¥±Ì€ôÑÕÉÑ±”¹•Ñ%Ñ•µ•Ñ…¥°¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜‘•Ñ…¥±ÌÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ÍÑ…­Ì€ôÍÑ…­Ì€¬€Ä(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥Ñ•µQåÁ”€ô‘•Ñ…¥±Ì¹¹…µ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´UÁ‘…Ñ”Ñ¡”Í¡Õ±­•È‰½àÌ½¹Ñ•¹ÑÌ(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹Í¡Õ±­•É%Ñ•´€ô¥Ñ•µQåÁ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹Í¡Õ±­•ÉMÑ…­Ì€ôÍÑ…­Ì((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´¥œÑ¡”Í¡Õ±­•È‰½à‰…¬ÕÀ(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹‘¥œ ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”(€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€´´]É…ÁÁ•È™½ÈÍÕ¬…¹‘¥œÑ¼•¹ÍÕÉ”¥¹Ù•¹Ñ½ÉäÍÑ…åÌÕÁ‘…Ñ•(€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÍÕ¬ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹ÍÕ¬ ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•™Ñ•ÉMÕ¬ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”(€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹‘¥œ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹‘¥œ ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•™Ñ•ÉMÕ¬ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¤(€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È€€€€€€€€´´%˜Ñ¡•É”¥Ì…¹ä¥Ñ•´¥¸Ñ¡”ÍÑ…¬°¥¹É•µ•¹ÐÑ¡”™Õ±±MÑ…­Ì½Õ¹Ñ•È(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÍÑ…¬¹½Õ¹Ð€ø€ÀÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ±±MÑ…­Ì€ô™Õ±±MÑ…­Ì€¬€Ä(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥Ñ•µ9…µ”€ôÍÑ…¬¹¹…µ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´=¹±äÕÁ‘…Ñ”¥˜Ñ¡•É”…É”™Õ±°ÍÑ…­Ì¥¸Ñ¡”Í¡Õ±­•È(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜™Õ±±MÑ…­Ì€ø€ÀÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´I•ÑÉ¥•Ù”Ñ¡”ÕÉÉ•¹Ð¥Ñ•´™É½´Ñ¡”¥¹Ù•¹Ñ½Éä€¡ÁÉ•Í•ÉÙ”¥ÑÌ½É¥¥¹…°¹…µ”…¹½Õ¹Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°ÕÉÉ•¹Ñ%Ñ•´€ô¥¹Ù•¹Ñ½ÉåmÍ¡Õ±­•ÉM±½Ñt((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´UÁ‘…Ñ”Ñ¡”Í¡Õ±­•É%Ñ•´…¹Í¡Õ±­•ÉMÑ…­Ì™¥•±‘ÌÝ¡¥±”±•…Ù¥¹œ¹…µ”…¹½Õ¹Ð¥¹Ñ…Ð(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ÕÉÉ•¹Ñ%Ñ•´¹Í¡Õ±­•É%Ñ•´€ô¥Ñ•µ9…µ”€´´9…µ”™É½´Ñ¡”™¥ÉÍÐÍÑ…¬¥¸Ñ¡”Í¡Õ±­•È(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ÕÉÉ•¹Ñ%Ñ•´¹Í¡Õ±­•ÉMÑ…­Ì€ô™Õ±±MÑ…­Ì€´´9Õµ‰•È½˜™Õ±°ÍÑ…­Ì((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´UÁ‘…Ñ”Ñ¡”¥¹Ù•¹Ñ½Éä•¹ÑÉä™½ÈÑ¡”Í¡Õ±­•ÉM±½Ð(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ¡Õ±­•ÉM±½Ñt€ôÕÉÉ•¹Ñ%Ñ•´(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”€´´MÕ•ÍÍ™Õ±±äÕÁ‘…Ñ•Í¡Õ±­•È‘…Ñ„(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´¹ÍÕÉ”Í±½ÐÍ•±•Ñ¥½¸¥Ì…±Ý…åÌÑÉ…­•(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹Í•±•ÑM±½Ð¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜Í±½Ð€øô€Ä…¹Í±½Ð€ðô€ÄØÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜Í±½ÐøôÍ•±•Ñ•‘M±½ÐÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ÑÕÉÑ±”¹Í•±•Ð¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€Í•±•Ñ•‘M±½Ð€ôÍ±½Ð(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•ÉÉ½È ‰%¹Ù…±¥Í±½Ð¹Õµ‰•Èè€ˆ€¸¸Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´A±…”…¸¥Ñ•´…¹ÕÁ‘…Ñ”¥¹Ù•¹Ñ½Éä(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹Á±…” ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹Á±…” ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ÕÁ‘…Ñ•™Ñ•ÉA±…” ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹Á±…•½Ý¸ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹Á±…•½Ý¸ ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•™Ñ•ÉA±…” ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•™Ñ•ÉA±…” ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½ÑtÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹½Õ¹Ð€ô¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹½Õ¹Ð€´€Ä(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹½Õ¹Ð€ðô€ÀÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt€ô¹¥°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´UÁ‘…Ñ”¥¹Ù•¹Ñ½Éä…™Ñ•ÈÍÕ­¥¹œ¥Ñ•µÌ(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•M±½Ð¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°‘•Ñ…¥±Ì€ôÑÕÉÑ±”¹•Ñ%Ñ•µ•Ñ…¥°¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜‘•Ñ…¥±ÌÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜¥¹Ù•¹Ñ½ÉåmÍ±½ÑtÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ±½Ñt¹½Õ¹Ð€ô‘•Ñ…¥±Ì¹½Õ¹Ð(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ±½Ñt€ôì(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹…µ”€ô‘•Ñ…¥±Ì¹¹…µ”°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€½Õ¹Ð€ô‘•Ñ…¥±Ì¹½Õ¹Ð°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€Í¡Õ±­•É%Ñ•´€ô¹¥°°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€Í¡Õ±­•ÉMÑ…­Ì€ô€À°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ±½Ñt€ô¹¥°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´•ÍÌ„Í¡Õ±­•È‰½à…¹ÑÉ…¬¥ÑÌ½¹Ñ•¹ÑÌ(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹…•ÍÍM¡Õ±­•È ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt…¹¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹¹…µ”é™¥¹ ‰Í¡Õ±­•É}‰½àˆ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹Á±…” ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´…±Õ±…Ñ”¡½Üµ…¹ä™Õ±°ÍÑ…­ÌÝ•É”¥¹Í¥‘”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°ÍÑ…­Ì€ô€À(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°¥Ñ•µQåÁ”€ô¹¥°((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™½ÈÍ±½Ð€ô€Ä°€ÄØ‘¼(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€±½…°‘•Ñ…¥±Ì€ôÑÕÉÑ±”¹•Ñ%Ñ•µ•Ñ…¥°¡Í±½Ð¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜‘•Ñ…¥±ÌÑ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ÍÑ…­Ì€ôÍÑ…­Ì€¬€Ä(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥Ñ•µQåÁ”€ô‘•Ñ…¥±Ì¹¹…µ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´UÁ‘…Ñ”Ñ¡”Í¡Õ±­•È‰½àÌ½¹Ñ•¹ÑÌ(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹Í¡Õ±­•É%Ñ•´€ô¥Ñ•µQåÁ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥¹Ù•¹Ñ½ÉåmÍ•±•Ñ•‘M±½Ñt¹Í¡Õ±­•ÉMÑ…­Ì€ôÍÑ…­Ì((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´¥œÑ¡”Í¡Õ±­•È‰½à‰…¬ÕÀ(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹‘¥œ ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€´´]É…ÁÁ•È™½ÈÍÕ¬…¹‘¥œÑ¼•¹ÍÕÉ”¥¹Ù•¹Ñ½ÉäÍÑ…åÌÕÁ‘…Ñ•(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÍÕ¬ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹ÍÕ¬ ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•™Ñ•ÉMÕ¬ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™Õ¹Ñ¥½¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹‘¥œ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¥˜ÑÕÉÑ±”¹‘¥œ ¤Ñ¡•¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€%¹Ù•¹Ñ½Éå]É…ÁÁ•È¹ÕÁ‘…Ñ•™Ñ•ÉMÕ¬ ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ÑÉÕ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸™…±Í”¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¥¥Õ©¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€•¹((€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸%¹Ù•¹Ñ½Éå]É…ÁÁ•È
+function InventoryWrapper.placeAndProcessShulker(shulkerSlot, methods, metaData)
+
+    InventoryWrapper.selectSlot(shulkerSlot)
+
+    if not turtle.detectUp() or turtle.digUp() then
+        if not turtle.placeUp() then
+            print("Unable to place shulker box")
+            return false
+        end
+    end
+
+    local allMethodsSuceeded = true
+
+    local continueProcessing = true -- Flag to track if processing should continue
+    for _, method in ipairs(methods) do
+        local success = method(shulkerSlot, metaData)
+        if not success then
+            print("Method failed, skipping further methods.")
+            allMethodsSuceeded = false
+            break
+        end
+    end
+
+    InventoryWrapper.selectSlot(shulkerSlot)
+    turtle.digUp()
+    return allMethodsSuceeded
+end
+
+function InventoryWrapper.checkForItem(shulkerSlot, targetItem)
+    logger.log("InventoryWrapper.checkForItem() checking shulker content:" .. InventoryWrapper.getShulkerItemName(shulkerSlot) .. "target Item is " .. targetItem)
+    return InventoryWrapper.getShulkerItemName(shulkerSlot) == targetItem
+end
+
+function InventoryWrapper.suckUp(shulkerSlot)
+
+    local itemSlot = InventoryWrapper.getEmptySlot(shulkerSlot)
+    InventoryWrapper.selectSlot(itemSlot)
+    -- Suck the items from the shulker box
+    if turtle.suckUp() then
+        InventoryWrapper.updateSlot(itemSlot)
+    else
+        logger.log("cant suck from shulker")
+    end
+
+    return true
+end
+
+
+function InventoryWrapper.wrapShulkerWithRetry(maxRetries, delay)
+    local retries = 0
+    local shulker = nil
+
+    while retries < maxRetries do
+        shulker = peripheral.wrap("top") -- Attempt to wrap the shulker box
+        if shulker then
+            return shulker -- Successfully wrapped the shulker box
+        end
+
+        retries = retries + 1
+        sleep(delay) -- Wait before retrying
+    end
+
+    print("Failed to wrap the shulker box after " .. maxRetries .. " retries.")
+    return nil -- Return nil if wrapping fails
+end
+
+function InventoryWrapper.initShulkerData(shulkerSlot)
+
+    logger.log("InventoryWrapper.initShulkerData() found item in shulker - updating inventory data")
+    -- Wrap the shulker box as a peripheral
+    --local shulker = peripheral.wrap("top")
+    local shulker = InventoryWrapper.wrapShulkerWithRetry(10,0.5)
+    if not shulker then
+        print("Can't wrap placed shulker")
+        print(tostring(peripheral.getNames()))
+        print(peripheral.getType("top"))
+        print(#peripheral.getNames())
+        print(menu.tableToString(peripheral.getNames(), indent))
+        exit()
+        return false -- Failed to wrap the shulker box
+    end
+
+    -- Initialize fullStacks counter
+    local fullStacks = 0
+    local itemName = "empty"
+
+    -- Iterate through the contents of the shulker box
+    local contents = shulker.list()
+
+    for _, stack in pairs(contents) do
+        -- If there is any item in the stack, increment the fullStacks counter
+        if stack.count > 0 then
+            fullStacks = fullStacks + 1
+            itemName = stack.name
+        end
+    end
+
+    -- Only update if there are full stacks in the shulker
+    if fullStacks > 0 then
+        -- Retrieve the current item from the inventory (preserve its original name and count)
+        local currentItem = inventory[shulkerSlot]
+
+        -- Update the shulkerItem and shulkerStacks fields while leaving name and count intact
+        currentItem.shulkerItem = itemName -- Name from the first stack in the shulker
+        currentItem.shulkerStacks = fullStacks -- Number of full stacks
+
+        -- Update the inventory entry for the shulkerSlot
+        inventory[shulkerSlot] = currentItem
+    end
+
+    return true -- Successfully updated shulker data
+end
+
+
+-- Ensure slot selection is always tracked
+function InventoryWrapper.selectSlot(slot)
+    if slot >= 1 and slot <= 16 then
+        if slot ~= selectedSlot then
+            turtle.select(slot)
+            selectedSlot = slot
+        end
+    else
+        error("Invalid slot number: " .. slot)
+    end
+end
+
+-- Place an item and update inventory
+function InventoryWrapper.place()
+    if turtle.place() then
+        updateAfterPlace()
+        return true
+    end
+    return false
+end
+
+function InventoryWrapper.placeDown()
+    if turtle.placeDown() then
+        InventoryWrapper.updateAfterPlace()
+        return true
+    end
+    return false
+end
+
+function InventoryWrapper.updateAfterPlace()
+    if inventory[selectedSlot] then
+        inventory[selectedSlot].count = inventory[selectedSlot].count - 1
+        if inventory[selectedSlot].count <= 0 then
+            inventory[selectedSlot] = nil
+        end
+    end
+end
+
+-- Update inventory after sucking items
+function InventoryWrapper.updateSlot(slot)
+    local details = turtle.getItemDetail(slot)
+    if details then
+        if inventory[slot] then
+            inventory[slot].count = details.count
+        else
+            inventory[slot] = {
+                name = details.name,
+                count = details.count,
+                shulkerItem = nil,
+                shulkerStacks = 0,
+            }
+        end
+    else
+        inventory[slot] = nil
+    end
+end
+
+-- Access a shulker box and track its contents
+function InventoryWrapper.accessShulker()
+    if inventory[selectedSlot] and inventory[selectedSlot].name:find("shulker_box") then
+        if turtle.place() then
+            -- Calculate how many full stacks were inside
+            local stacks = 0
+            local itemType = nil
+
+            for slot = 1, 16 do
+                local details = turtle.getItemDetail(slot)
+                if details then
+                    stacks = stacks + 1
+                    itemType = details.name
+                end
+            end
+
+            -- Update the shulker box's contents
+            inventory[selectedSlot].shulkerItem = itemType
+            inventory[selectedSlot].shulkerStacks = stacks
+
+            -- Dig the shulker box back up
+            if turtle.dig() then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- Wrapper for suck and dig to ensure inventory stays updated
+function InventoryWrapper.suck()
+    if turtle.suck() then
+        InventoryWrapper.updateAfterSuck()
+        return true
+    end
+    return false
+end
+
+function InventoryWrapper.dig()
+    if turtle.dig() then
+        InventoryWrapper.updateAfterSuck()
+        return true
+    end
+    return false iujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiuji
+end
+
+return InventoryWrapper        -- If there is any item in the stack, increment the fullStacks counter
+                               if stack.count > 0 then
+                                   fullStacks = fullStacks + 1
+                                   itemName = stack.name
+                               end
+                           end
+
+                           -- Only update if there are full stacks in the shulker
+                           if fullStacks > 0 then
+                               -- Retrieve the current item from the inventory (preserve its original name and count)
+                               local currentItem = inventory[shulkerSlot]
+
+                               -- Update the shulkerItem and shulkerStacks fields while leaving name and count intact
+                               currentItem.shulkerItem = itemName -- Name from the first stack in the shulker
+                               currentItem.shulkerStacks = fullStacks -- Number of full stacks
+
+                               -- Update the inventory entry for the shulkerSlot
+                               inventory[shulkerSlot] = currentItem
+                           end
+
+                           return true -- Successfully updated shulker data
+                       end
+
+
+                       -- Ensure slot selection is always tracked
+                       function InventoryWrapper.selectSlot(slot)
+                           if slot >= 1 and slot <= 16 then
+                               if slot ~= selectedSlot then
+                                   turtle.select(slot)
+                                   selectedSlot = slot
+                               end
+                           else
+                               error("Invalid slot number: " .. slot)
+                           end
+                       end
+
+                       -- Place an item and update inventory
+                       function InventoryWrapper.place()
+                           if turtle.place() then
+                               updateAfterPlace()
+                               return true
+                           end
+                           return false
+                       end
+
+                       function InventoryWrapper.placeDown()
+                           if turtle.placeDown() then
+                               InventoryWrapper.updateAfterPlace()
+                               return true
+                           end
+                           return false
+                       end
+
+                       function InventoryWrapper.updateAfterPlace()
+                           if inventory[selectedSlot] then
+                               inventory[selectedSlot].count = inventory[selectedSlot].count - 1
+                               if inventory[selectedSlot].count <= 0 then
+                                   inventory[selectedSlot] = nil
+                               end
+                           end
+                       end
+
+                       -- Update inventory after sucking items
+                       function InventoryWrapper.updateSlot(slot)
+                           local details = turtle.getItemDetail(slot)
+                           if details then
+                               if inventory[slot] then
+                                   inventory[slot].count = details.count
+                               else
+                                   inventory[slot] = {
+                                       name = details.name,
+                                       count = details.count,
+                                       shulkerItem = nil,
+                                       shulkerStacks = 0,
+                                   }
+                               end
+                           else
+                               inventory[slot] = nil
+                           end
+                       end
+
+                       -- Access a shulker box and track its contents
+                       function InventoryWrapper.accessShulker()
+                           if inventory[selectedSlot] and inventory[selectedSlot].name:find("shulker_box") then
+                               if turtle.place() then
+                                   -- Calculate how many full stacks were inside
+                                   local stacks = 0
+                                   local itemType = nil
+
+                                   for slot = 1, 16 do
+                                       local details = turtle.getItemDetail(slot)
+                                       if details then
+                                           stacks = stacks + 1
+                                           itemType = details.name
+                                       end
+                                   end
+
+                                   -- Update the shulker box's contents
+                                   inventory[selectedSlot].shulkerItem = itemType
+                                   inventory[selectedSlot].shulkerStacks = stacks
+
+                                   -- Dig the shulker box back up
+                                   if turtle.dig() then
+                                       return true
+                                   end
+                               end
+                           end
+                           return false
+                       end
+
+                       -- Wrapper for suck and dig to ensure inventory stays updated
+                       function InventoryWrapper.suck()
+                           if turtle.suck() then
+                               InventoryWrapper.updateAfterSuck()
+                               return true
+                           end
+                           return false
+                       end
+
+                       function InventoryWrapper.dig()
+                           if turtle.dig() then
+                               InventoryWrapper.updateAfterSuck()
+                               return true
+                           end
+                           return false iujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiuji
+                       end
+
+                       return InventoryWrapper        -- If there is any item in the stack, increment the fullStacks counter
+                                                      if stack.count > 0 then
+                                                          fullStacks = fullStacks + 1
+                                                          itemName = stack.name
+                                                      end
+                                                  end
+
+                                                  -- Only update if there are full stacks in the shulker
+                                                  if fullStacks > 0 then
+                                                      -- Retrieve the current item from the inventory (preserve its original name and count)
+                                                      local currentItem = inventory[shulkerSlot]
+
+                                                      -- Update the shulkerItem and shulkerStacks fields while leaving name and count intact
+                                                      currentItem.shulkerItem = itemName -- Name from the first stack in the shulker
+                                                      currentItem.shulkerStacks = fullStacks -- Number of full stacks
+
+                                                      -- Update the inventory entry for the shulkerSlot
+                                                      inventory[shulkerSlot] = currentItem
+                                                  end
+
+                                                  return true -- Successfully updated shulker data
+                                              end
+
+
+                                              -- Ensure slot selection is always tracked
+                                              function InventoryWrapper.selectSlot(slot)
+                                                  if slot >= 1 and slot <= 16 then
+                                                      if slot ~= selectedSlot then
+                                                          turtle.select(slot)
+                                                          selectedSlot = slot
+                                                      end
+                                                  else
+                                                      error("Invalid slot number: " .. slot)
+                                                  end
+                                              end
+
+                                              -- Place an item and update inventory
+                                              function InventoryWrapper.place()
+                                                  if turtle.place() then
+                                                      updateAfterPlace()
+                                                      return true
+                                                  end
+                                                  return false
+                                              end
+
+                                              function InventoryWrapper.placeDown()
+                                                  if turtle.placeDown() then
+                                                      InventoryWrapper.updateAfterPlace()
+                                                      return true
+                                                  end
+                                                  return false
+                                              end
+
+                                              function InventoryWrapper.updateAfterPlace()
+                                                  if inventory[selectedSlot] then
+                                                      inventory[selectedSlot].count = inventory[selectedSlot].count - 1
+                                                      if inventory[selectedSlot].count <= 0 then
+                                                          inventory[selectedSlot] = nil
+                                                      end
+                                                  end
+                                              end
+
+                                              -- Update inventory after sucking items
+                                              function InventoryWrapper.updateSlot(slot)
+                                                  local details = turtle.getItemDetail(slot)
+                                                  if details then
+                                                      if inventory[slot] then
+                                                          inventory[slot].count = details.count
+                                                      else
+                                                          inventory[slot] = {
+                                                              name = details.name,
+                                                              count = details.count,
+                                                              shulkerItem = nil,
+                                                              shulkerStacks = 0,
+                                                          }
+                                                      end
+                                                  else
+                                                      inventory[slot] = nil
+                                                  end
+                                              end
+
+                                              -- Access a shulker box and track its contents
+                                              function InventoryWrapper.accessShulker()
+                                                  if inventory[selectedSlot] and inventory[selectedSlot].name:find("shulker_box") then
+                                                      if turtle.place() then
+                                                          -- Calculate how many full stacks were inside
+                                                          local stacks = 0
+                                                          local itemType = nil
+
+                                                          for slot = 1, 16 do
+                                                              local details = turtle.getItemDetail(slot)
+                                                              if details then
+                                                                  stacks = stacks + 1
+                                                                  itemType = details.name
+                                                              end
+                                                          end
+
+                                                          -- Update the shulker box's contents
+                                                          inventory[selectedSlot].shulkerItem = itemType
+                                                          inventory[selectedSlot].shulkerStacks = stacks
+
+                                                          -- Dig the shulker box back up
+                                                          if turtle.dig() then
+                                                              return true
+                                                          end
+                                                      end
+                                                  end
+                                                  return false
+                                              end
+
+                                              -- Wrapper for suck and dig to ensure inventory stays updated
+                                              function InventoryWrapper.suck()
+                                                  if turtle.suck() then
+                                                      InventoryWrapper.updateAfterSuck()
+                                                      return true
+                                                  end
+                                                  return false
+                                              end
+
+                                              function InventoryWrapper.dig()
+                                                  if turtle.dig() then
+                                                      InventoryWrapper.updateAfterSuck()
+                                                      return true
+                                                  end
+                                                  return false iujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiujiiuji
+                                              end
+
+                                              return InventoryWrapper

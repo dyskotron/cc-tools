@@ -1,1 +1,348 @@
-local+menu+%3D+require%28%22Modules.menulib%22%29%0Alocal+logger+%3D+require%28%22Modules.logger%22%29%0A%0Alocal+InventoryWrapper+%3D+%7B%7D%0A%0Alocal+inventory+%3D+%7B%7D%0Alocal+selectedSlot+%3D+1+--+Track+the+currently+selected+slot%0A%0A--+Initialize+the+inventory+table%0Afunction+InventoryWrapper.init%28%29%0A++++inventory+%3D+%7B%7D%0A++++selectedSlot+%3D+turtle.getSelectedSlot%28%29+--+Store+the+current+selected+slot%0A++++for+slot+%3D+1%2C+16+do%0A++++++++local+details+%3D+turtle.getItemDetail%28slot%29%0A++++++++if+details+then%0A++++++++++++inventory%5Bslot%5D+%3D+%7B%0A++++++++++++++++name+%3D+details.name%2C%0A++++++++++++++++count+%3D+details.count%2C%0A++++++++++++++++shulkerItem+%3D+nil%2C+--+Item+type+inside+the+shulker+box+%28if+applicable%29%0A++++++++++++++++shulkerStacks+%3D+0%2C+--+Number+of+full+stacks+inside+the+shulker+box%0A++++++++++++%7D%0A++++++++else%0A++++++++++++inventory%5Bslot%5D+%3D+nil%0A++++++++end%0A++++end%0Aend%0A%0Afunction+InventoryWrapper.getItemAt%28slot%29%0A++++if+slot+%3C+1+or+slot+%3E+16+then%0A++++++++print%28%22Invalid+slot+number.+Must+be+between+1+and+16.%22%29%0A++++++++return+nil%0A++++end%0A%0A++++return+inventory%5Bslot%5D%0Aend%0A%0Afunction+InventoryWrapper.printInventory%28%29%0A++++print%28%22Inventory+Contents%3A%22%29%0A++++for+slot%2C+item+in+pairs%28inventory%29+do%0A++++++++if+item+then%0A++++++++++++print%28item.name+..+%22%28%22+..+item.count+..+%22%29%22%29%0A++++++++end%0A++++end%0Aend%0A%0Afunction+InventoryWrapper.printShulkers%28%29%0A++++print%28%22Inventory+Contents%3A%22%29%0A++++for+slot%2C+item+in+pairs%28inventory%29+do%0A++++++++if+item+then%0A++++++++++++if+item.shulkerItem+then%0A++++++++++++++++print%28item.name+..+%22%28%22+..+item.shulkerItem+..+%22%29%22%29%0A++++++++++++end%0A++++++++end%0A++++end%0Aend%0A%0A--+Get+the+first+empty+slot%2C+excluding+the+reserved+slot%0Afunction+InventoryWrapper.getEmptySlot%28exclude%29%0A++++--+Iterate+over+the+inventory+slots%0A++++for+slot+%3D+1%2C+16+do%0A++++++++--+Check+if+the+slot+is+empty+and+not+the+excluded+reserved+slot%0A++++++++if+not+inventory%5Bslot%5D+and+slot+~%3D+exclude+then%0A++++++++++++return+slot%0A++++++++end%0A++++end%0A++++return+nil+--+Return+nil+if+no+empty+slot+is+found%0Aend%0A%0Afunction+InventoryWrapper.getShulkerItemName%28slot%29%0A++++--+Check+if+the+slot+exists+in+the+inventory+and+contains+a+shulker%0A++++local+item+%3D+inventory%5Bslot%5D%0A++++if+item+and+item.shulkerItem+then%0A++++++++return+item.shulkerItem+--+Return+the+name+of+the+item+inside+the+shulker%0A++++else%0A++++++++return+nil+--+No+shulker+item+in+the+slot%0A++++end%0Aend%0A%0A--+Select+a+slot+containing+the+specified+item%2C+optionally+loading+from+shulker+boxes%0Afunction+InventoryWrapper.select%28itemName%2C+tryLoadFromShulker%29%0A++++--+First%2C+check+the+inventory+for+the+item%0A++++for+slot%2C+item+in+pairs%28inventory%29+do%0A++++++++if+item.name+%3D%3D+itemName+then%0A++++++++++++if+slot+~%3D+selectedSlot+then%0A++++++++++++++++turtle.select%28slot%29%0A++++++++++++++++selectedSlot+%3D+slot%0A++++++++++++end%0A++++++++++++logger.log%28%22InventoryWrapper.select%28%29+found+item+%22+..+itemName+..+%22+directly+in+inventory%22%29%0A++++++++++++return+true%0A++++++++end%0A++++end%0A%0A++++--+If+the+item+is+not+found+and+tryLoadFromShulker+is+true%2C+load+from+shulker%0A++++if+tryLoadFromShulker+then%0A++++++++logger.log%28%22InventoryWrapper.select%28%29+trying+to+load+%22+..+itemName+..+%22+from+shulker%22%29%0A++++++++if+InventoryWrapper.tryLoadFromShulker%28itemName%29+then%0A++++++++++++--+Retry+selecting+the+item+after+loading%0A++++++++++++logger.log%28%22InventoryWrapper.select%28%29+Retry+selecting++%22+..+itemName+..+%22+after+sucesfull+loading%22%29%0A++++++++++++return+InventoryWrapper.select%28itemName%2C+false%29%0A++++++++end%0A++++end%0A%0A++++--+Item+not+found+in+inventory+or+shulker+boxes%0A++++return+false%0Aend%0A%0A--+Load+items+of+a+specific+type+from+a+shulker+box%0Afunction+InventoryWrapper.tryLoadFromShulker%28itemName%29%0A++++--+First%2C+check+confirmed+shulkers%0A++++for+slot%2C+item+in+pairs%28inventory%29+do%0A++++++++if+item.name%3Afind%28%22shulker_box%22%29+and+item.shulkerItem+%3D%3D+itemName+and+item.shulkerStacks+%3E+0+then%0A++++++++++++--+Shulker+confirmed%2C+place+it%2C+suck+the+item%2C+and+dig+it+back%0A++++++++++++logger.log%28%22InventoryWrapper.select%28%29+found+item+%22+..+itemName+..+%22+in+shulker+box%22%29%0A++++++++++++return+InventoryWrapper.placeAndProcessShulker%28slot%2C+%7BInventoryWrapper.suckUp%7D%29%0A++++++++end%0A++++end%0A%0A++++--+If+item+not+found%2C+lazily+check+unconfirmed+shulkers%0A++++for+slot%2C+item+in+pairs%28inventory%29+do%0A++++++++if+item.name%3Afind%28%22shulker_box%22%29+and+not+item.shulkerItem+then%0A++++++++++++logger.log%28%22InventoryWrapper.select%28%29+checking+shulker+box%22%29%0A++++++++++++if+InventoryWrapper.placeAndProcessShulker%28slot%2C+%7BInventoryWrapper.initShulkerData%2C+InventoryWrapper.checkForItem%2C+InventoryWrapper.suckUp%7D%2C+itemName%29+then+--+need+to+add+the+extra+param+here%0A++++++++++++++++return+true%0A++++++++++++end%0A++++++++end%0A++++end%0A%0A++++return+false+--+No+matching+shulker+box+found%0Aend%0A%0Afunction+InventoryWrapper.placeAndProcessShulker%28shulkerSlot%2C+methods%2C+metaData%29%0A%0A++++InventoryWrapper.selectSlot%28shulkerSlot%29%0A%0A++++if+not+turtle.detectUp%28%29+or+turtle.digUp%28%29+then%0A++++++++if+not+turtle.placeUp%28%29+then%0A++++++++++++print%28%22Unable+to+place+shulker+box%22%29%0A++++++++++++return+false%0A++++++++end%0A++++end%0A%0A++++local+allMethodsSuceeded+%3D+true%0A%0A++++local+continueProcessing+%3D+true+--+Flag+to+track+if+processing+should+continue%0A++++for+_%2C+method+in+ipairs%28methods%29+do%0A++++++++local+success+%3D+method%28shulkerSlot%2C+metaData%29%0A++++++++if+not+success+then%0A++++++++++++print%28%22Method+failed%2C+skipping+further+methods.%22%29%0A++++++++++++allMethodsSuceeded+%3D+false%0A++++++++++++break%0A++++++++end%0A++++end%0A%0A++++InventoryWrapper.selectSlot%28shulkerSlot%29%0A++++turtle.digUp%28%29%0A++++return+allMethodsSuceeded%0Aend%0A%0Afunction+InventoryWrapper.checkForItem%28shulkerSlot%2C+targetItem%29%0A++++logger.log%28%22InventoryWrapper.checkForItem%28%29+checking+shulker+content%3A%22+..+InventoryWrapper.getShulkerItemName%28shulkerSlot%29+..+%22target+Item+is+%22+..+targetItem%29%0A++++return+InventoryWrapper.getShulkerItemName%28shulkerSlot%29+%3D%3D+targetItem%0Aend%0A%0Afunction+InventoryWrapper.suckUp%28shulkerSlot%29%0A%0A++++local+itemSlot+%3D+InventoryWrapper.getEmptySlot%28shulkerSlot%29%0A++++InventoryWrapper.selectSlot%28itemSlot%29%0A++++--+Suck+the+items+from+the+shulker+box%0A++++if+turtle.suckUp%28%29+then%0A++++++++InventoryWrapper.updateSlot%28itemSlot%29%0A++++else%0A++++++++logger.log%28%22cant+suck+from+shulker%22%29%0A++++end%0A%0A++++return+true%0Aend%0A%0A%0Afunction+InventoryWrapper.wrapShulkerWithRetry%28maxRetries%2C+delay%29%0A++++local+retries+%3D+0%0A++++local+shulker+%3D+nil%0A%0A++++while+retries+%3C+maxRetries+do%0A++++++++shulker+%3D+peripheral.wrap%28%22top%22%29+--+Attempt+to+wrap+the+shulker+box%0A++++++++if+shulker+then%0A++++++++++++return+shulker+--+Successfully+wrapped+the+shulker+box%0A++++++++end%0A%0A++++++++retries+%3D+retries+%2B+1%0A++++++++sleep%28delay%29+--+Wait+before+retrying%0A++++end%0A%0A++++print%28%22Failed+to+wrap+the+shulker+box+after+%22+..+maxRetries+..+%22+retries.%22%29%0A++++return+nil+--+Return+nil+if+wrapping+fails%0Aend%0A%0Afunction+InventoryWrapper.initShulkerData%28shulkerSlot%29%0A%0A++++logger.log%28%22InventoryWrapper.initShulkerData%28%29+found+item+in+shulker+-+updating+inventory+data%22%29%0A++++--+Wrap+the+shulker+box+as+a+peripheral%0A++++--local+shulker+%3D+peripheral.wrap%28%22top%22%29%0A++++local+shulker+%3D+InventoryWrapper.wrapShulkerWithRetry%2810%2C0.5%29%0A++++if+not+shulker+then%0A++++++++print%28%22Can%27t+wrap+placed+shulker%22%29%0A++++++++print%28tostring%28peripheral.getNames%28%29%29%29%0A++++++++print%28peripheral.getType%28%22top%22%29%29%0A++++++++print%28%23peripheral.getNames%28%29%29%0A++++++++print%28menu.tableToString%28peripheral.getNames%28%29%2C+indent%29%29%0A++++++++exit%28%29%0A++++++++return+false+--+Failed+to+wrap+the+shulker+box%0A++++end%0A%0A++++--+Initialize+fullStacks+counter%0A++++local+fullStacks+%3D+0%0A++++local+itemName+%3D+%22empty%22%0A%0A++++--+Iterate+through+the+contents+of+the+shulker+box%0A++++local+contents+%3D+shulker.list%28%29%0A%0A++++for+_%2C+stack+in+pairs%28contents%29+do%0A++++++++--+If+there+is+any+item+in+the+stack%2C+increment+the+fullStacks+counter%0A++++++++if+stack.count+%3E+0+then%0A++++++++++++fullStacks+%3D+fullStacks+%2B+1%0A++++++++++++itemName+%3D+stack.name%0A++++++++end%0A++++end%0A%0A++++--+Only+update+if+there+are+full+stacks+in+the+shulker%0A++++if+fullStacks+%3E+0+then%0A++++++++--+Retrieve+the+current+item+from+the+inventory+%28preserve+its+original+name+and+count%29%0A++++++++local+currentItem+%3D+inventory%5BshulkerSlot%5D%0A%0A++++++++--+Update+the+shulkerItem+and+shulkerStacks+fields+while+leaving+name+and+count+intact%0A++++++++currentItem.shulkerItem+%3D+itemName+--+Name+from+the+first+stack+in+the+shulker%0A++++++++currentItem.shulkerStacks+%3D+fullStacks+--+Number+of+full+stacks%0A%0A++++++++--+Update+the+inventory+entry+for+the+shulkerSlot%0A++++++++inventory%5BshulkerSlot%5D+%3D+currentItem%0A++++end%0A%0A++++return+true+--+Successfully+updated+shulker+data%0Aend%0A%0A%0A--+Ensure+slot+selection+is+always+tracked%0Afunction+InventoryWrapper.selectSlot%28slot%29%0A++++if+slot+%3E%3D+1+and+slot+%3C%3D+16+then%0A++++++++if+slot+~%3D+selectedSlot+then%0A++++++++++++turtle.select%28slot%29%0A++++++++++++selectedSlot+%3D+slot%0A++++++++end%0A++++else%0A++++++++error%28%22Invalid+slot+number%3A+%22+..+slot%29%0A++++end%0Aend%0A%0A--+Place+an+item+and+update+inventory%0Afunction+InventoryWrapper.place%28%29%0A++++if+turtle.place%28%29+then%0A++++++++updateAfterPlace%28%29%0A++++++++return+true%0A++++end%0A++++return+false%0Aend%0A%0Afunction+InventoryWrapper.placeDown%28%29%0A++++if+turtle.placeDown%28%29+then%0A++++++++InventoryWrapper.updateAfterPlace%28%29%0A++++++++return+true%0A++++end%0A++++return+false%0Aend%0A%0Afunction+InventoryWrapper.updateAfterPlace%28%29%0A++++if+inventory%5BselectedSlot%5D+then%0A++++++++inventory%5BselectedSlot%5D.count+%3D+inventory%5BselectedSlot%5D.count+-+1%0A++++++++if+inventory%5BselectedSlot%5D.count+%3C%3D+0+then%0A++++++++++++inventory%5BselectedSlot%5D+%3D+nil%0A++++++++end%0A++++end%0Aend%0A%0A--+Update+inventory+after+sucking+items%0Afunction+InventoryWrapper.updateSlot%28slot%29%0A++++local+details+%3D+turtle.getItemDetail%28slot%29%0A++++if+details+then%0A++++++++if+inventory%5Bslot%5D+then%0A++++++++++++inventory%5Bslot%5D.count+%3D+details.count%0A++++++++else%0A++++++++++++inventory%5Bslot%5D+%3D+%7B%0A++++++++++++++++name+%3D+details.name%2C%0A++++++++++++++++count+%3D+details.count%2C%0A++++++++++++++++shulkerItem+%3D+nil%2C%0A++++++++++++++++shulkerStacks+%3D+0%2C%0A++++++++++++%7D%0A++++++++end%0A++++else%0A++++++++inventory%5Bslot%5D+%3D+nil%0A++++end%0Aend%0A%0A--+Access+a+shulker+box+and+track+its+contents%0Afunction+InventoryWrapper.accessShulker%28%29%0A++++if+inventory%5BselectedSlot%5D+and+inventory%5BselectedSlot%5D.name%3Afind%28%22shulker_box%22%29+then%0A++++++++if+turtle.place%28%29+then%0A++++++++++++--+Calculate+how+many+full+stacks+were+inside%0A++++++++++++local+stacks+%3D+0%0A++++++++++++local+itemType+%3D+nil%0A%0A++++++++++++for+slot+%3D+1%2C+16+do%0A++++++++++++++++local+details+%3D+turtle.getItemDetail%28slot%29%0A++++++++++++++++if+details+then%0A++++++++++++++++++++stacks+%3D+stacks+%2B+1%0A++++++++++++++++++++itemType+%3D+details.name%0A++++++++++++++++end%0A++++++++++++end%0A%0A++++++++++++--+Update+the+shulker+box%27s+contents%0A++++++++++++inventory%5BselectedSlot%5D.shulkerItem+%3D+itemType%0A++++++++++++inventory%5BselectedSlot%5D.shulkerStacks+%3D+stacks%0A%0A++++++++++++--+Dig+the+shulker+box+back+up%0A++++++++++++if+turtle.dig%28%29+then%0A++++++++++++++++return+true%0A++++++++++++end%0A++++++++end%0A++++end%0A++++return+false%0Aend%0A%0A--+Wrapper+for+suck+and+dig+to+ensure+inventory+stays+updated%0Afunction+InventoryWrapper.suck%28%29%0A++++if+turtle.suck%28%29+then%0A++++++++InventoryWrapper.updateAfterSuck%28%29%0A++++++++return+true%0A++++end%0A++++return+false%0Aend%0A%0Afunction+InventoryWrapper.dig%28%29%0A++++if+turtle.dig%28%29+then%0A++++++++InventoryWrapper.updateAfterSuck%28%29%0A++++++++return+true%0A++++end%0A++++return+false%0Aend%0A%0Areturn+InventoryWrapper
+local menu = require("Modules.menulib")
+local logger = require("Modules.logger")
+
+local InventoryWrapper = {}
+
+local inventory = {}
+local selectedSlot = 1 -- Track the currently selected slot
+
+-- Initialize the inventory table
+function InventoryWrapper.init()
+    inventory = {}
+    selectedSlot = turtle.getSelectedSlot() -- Store the current selected slot
+    for slot = 1, 16 do
+        local details = turtle.getItemDetail(slot)
+        if details then
+            inventory[slot] = {
+                name = details.name,
+                count = details.count,
+                shulkerItem = nil, -- Item type inside the shulker box (if applicable)
+                shulkerStacks = 0, -- Number of full stacks inside the shulker box
+            }
+        else
+            inventory[slot] = nil
+        end
+    end
+end
+
+function InventoryWrapper.getItemAt(slot)
+    if slot < 1 or slot > 16 then
+        print("Invalid slot number. Must be between 1 and 16.")
+        return nil
+    end
+
+    return inventory[slot]
+end
+
+function InventoryWrapper.printInventory()
+    print("Inventory Contents:")
+    for slot, item in pairs(inventory) do
+        if item then
+            print(item.name .. "(" .. item.count .. ")")
+        end
+    end
+end
+
+function InventoryWrapper.printShulkers()
+    print("Inventory Contents:")
+    for slot, item in pairs(inventory) do
+        if item then
+            if item.shulkerItem then
+                print(item.name .. "(" .. item.shulkerItem .. ")")
+            end
+        end
+    end
+end
+
+-- Get the first empty slot, excluding the reserved slot
+function InventoryWrapper.getEmptySlot(exclude)
+    -- Iterate over the inventory slots
+    for slot = 1, 16 do
+        -- Check if the slot is empty and not the excluded reserved slot
+        if not inventory[slot] and slot ~= exclude then
+            return slot
+        end
+    end
+    return nil -- Return nil if no empty slot is found
+end
+
+function InventoryWrapper.getShulkerItemName(slot)
+    -- Check if the slot exists in the inventory and contains a shulker
+    local item = inventory[slot]
+    if item and item.shulkerItem then
+        return item.shulkerItem -- Return the name of the item inside the shulker
+    else
+        return nil -- No shulker item in the slot
+    end
+end
+
+-- Select a slot containing the specified item, optionally loading from shulker boxes
+function InventoryWrapper.select(itemName, tryLoadFromShulker)
+    -- First, check the inventory for the item
+    for slot, item in pairs(inventory) do
+        if item.name == itemName then
+            if slot ~= selectedSlot then
+                turtle.select(slot)
+                selectedSlot = slot
+            end
+            logger.log("InventoryWrapper.select() found item " .. itemName .. " directly in inventory")
+            return true
+        end
+    end
+
+    -- If the item is not found and tryLoadFromShulker is true, load from shulker
+    if tryLoadFromShulker then
+        logger.log("InventoryWrapper.select() trying to load " .. itemName .. " from shulker")
+        if InventoryWrapper.tryLoadFromShulker(itemName) then
+            -- Retry selecting the item after loading
+            logger.log("InventoryWrapper.select() Retry selecting  " .. itemName .. " after sucesfull loading")
+            return InventoryWrapper.select(itemName, false)
+        end
+    end
+
+    -- Item not found in inventory or shulker boxes
+    return false
+end
+
+-- Load items of a specific type from a shulker box
+function InventoryWrapper.tryLoadFromShulker(itemName)
+    -- First, check confirmed shulkers
+    for slot, item in pairs(inventory) do
+        if item.name:find("shulker_box") and item.shulkerItem == itemName and item.shulkerStacks > 0 then
+            -- Shulker confirmed, place it, suck the item, and dig it back
+            logger.log("InventoryWrapper.select() found item " .. itemName .. " in shulker box")
+            return InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.suckUp})
+        end
+    end
+
+    -- If item not found, lazily check unconfirmed shulkers
+    for slot, item in pairs(inventory) do
+        if item.name:find("shulker_box") and not item.shulkerItem then
+            logger.log("InventoryWrapper.select() checking shulker box")
+            if InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.initShulkerData, InventoryWrapper.checkForItem, InventoryWrapper.suckUp}, itemName) then -- need to add the extra param here
+                return true
+            end
+        end
+    end
+
+    return false -- No matching shulker box found
+end
+
+function InventoryWrapper.placeAndProcessShulker(shulkerSlot, methods, metaData)
+
+    InventoryWrapper.selectSlot(shulkerSlot)
+
+    if not turtle.detectUp() or turtle.digUp() then
+        if not turtle.placeUp() then
+            print("Unable to place shulker box")
+            return false
+        end
+    end
+
+    local allMethodsSuceeded = true
+
+    local continueProcessing = true -- Flag to track if processing should continue
+    for _, method in ipairs(methods) do
+        local success = method(shulkerSlot, metaData)
+        if not success then
+            print("Method failed, skipping further methods.")
+            allMethodsSuceeded = false
+            break
+        end
+    end
+
+    InventoryWrapper.selectSlot(shulkerSlot)
+    turtle.digUp()
+    return allMethodsSuceeded
+end
+
+function InventoryWrapper.checkForItem(shulkerSlot, targetItem)
+    logger.log("InventoryWrapper.checkForItem() checking shulker content:" .. InventoryWrapper.getShulkerItemName(shulkerSlot) .. "target Item is " .. targetItem)
+    return InventoryWrapper.getShulkerItemName(shulkerSlot) == targetItem
+end
+
+function InventoryWrapper.suckUp(shulkerSlot)
+
+    local itemSlot = InventoryWrapper.getEmptySlot(shulkerSlot)
+    InventoryWrapper.selectSlot(itemSlot)
+    -- Suck the items from the shulker box
+    if turtle.suckUp() then
+        InventoryWrapper.updateSlot(itemSlot)
+    else
+        logger.log("cant suck from shulker")
+    end
+
+    return true
+end
+
+
+function InventoryWrapper.wrapShulkerWithRetry(maxRetries, delay)
+    local retries = 0
+    local shulker = nil
+
+    while retries < maxRetries do
+        shulker = peripheral.wrap("top") -- Attempt to wrap the shulker box
+        if shulker then
+            return shulker -- Successfully wrapped the shulker box
+        end
+
+        retries = retries + 1
+        sleep(delay) -- Wait before retrying
+    end
+
+    print("Failed to wrap the shulker box after " .. maxRetries .. " retries.")
+    return nil -- Return nil if wrapping fails
+end
+
+function InventoryWrapper.initShulkerData(shulkerSlot)
+
+    logger.log("InventoryWrapper.initShulkerData() found item in shulker - updating inventory data")
+    -- Wrap the shulker box as a peripheral
+    --local shulker = peripheral.wrap("top")
+    local shulker = InventoryWrapper.wrapShulkerWithRetry(10,0.5)
+    if not shulker then
+        print("Can't wrap placed shulker")
+        print(tostring(peripheral.getNames()))
+        print(peripheral.getType("top"))
+        print(#peripheral.getNames())
+        print(menu.tableToString(peripheral.getNames(), indent))
+        exit()
+        return false -- Failed to wrap the shulker box
+    end
+
+    -- Initialize fullStacks counter
+    local fullStacks = 0
+    local itemName = "empty"
+
+    -- Iterate through the contents of the shulker box
+    local contents = shulker.list()
+
+    for _, stack in pairs(contents) do
+        -- If there is any item in the stack, increment the fullStacks counter
+        if stack.count > 0 then
+            fullStacks = fullStacks + 1
+            itemName = stack.name
+        end
+    end
+
+    -- Only update if there are full stacks in the shulker
+    if fullStacks > 0 then
+        -- Retrieve the current item from the inventory (preserve its original name and count)
+        local currentItem = inventory[shulkerSlot]
+
+        -- Update the shulkerItem and shulkerStacks fields while leaving name and count intact
+        currentItem.shulkerItem = itemName -- Name from the first stack in the shulker
+        currentItem.shulkerStacks = fullStacks -- Number of full stacks
+
+        -- Update the inventory entry for the shulkerSlot
+        inventory[shulkerSlot] = currentItem
+    end
+
+    return true -- Successfully updated shulker data
+end
+
+
+-- Ensure slot selection is always tracked
+function InventoryWrapper.selectSlot(slot)
+    if slot >= 1 and slot <= 16 then
+        if slot ~= selectedSlot then
+            turtle.select(slot)
+            selectedSlot = slot
+        end
+    else
+        error("Invalid slot number: " .. slot)
+    end
+end
+
+-- Place an item and update inventory
+function InventoryWrapper.place()
+    if turtle.place() then
+        updateAfterPlace()
+        return true
+    end
+    return false
+end
+
+function InventoryWrapper.placeDown()
+    if turtle.placeDown() then
+        InventoryWrapper.updateAfterPlace()
+        return true
+    end
+    return false
+end
+
+function InventoryWrapper.updateAfterPlace()
+    if inventory[selectedSlot] then
+        inventory[selectedSlot].count = inventory[selectedSlot].count - 1
+        if inventory[selectedSlot].count <= 0 then
+            inventory[selectedSlot] = nil
+        end
+    end
+end
+
+-- Update inventory after sucking items
+function InventoryWrapper.updateSlot(slot)
+    local details = turtle.getItemDetail(slot)
+    if details then
+        if inventory[slot] then
+            inventory[slot].count = details.count
+        else
+            inventory[slot] = {
+                name = details.name,
+                count = details.count,
+                shulkerItem = nil,
+                shulkerStacks = 0,
+            }
+        end
+    else
+        inventory[slot] = nil
+    end
+end
+
+-- Access a shulker box and track its contents
+function InventoryWrapper.accessShulker()
+    if inventory[selectedSlot] and inventory[selectedSlot].name:find("shulker_box") then
+        if turtle.place() then
+            -- Calculate how many full stacks were inside
+            local stacks = 0
+            local itemType = nil
+
+            for slot = 1, 16 do
+                local details = turtle.getItemDetail(slot)
+                if details then
+                    stacks = stacks + 1
+                    itemType = details.name
+                end
+            end
+
+            -- Update the shulker box's contents
+            inventory[selectedSlot].shulkerItem = itemType
+            inventory[selectedSlot].shulkerStacks = stacks
+
+            -- Dig the shulker box back up
+            if turtle.dig() then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- Wrapper for suck and dig to ensure inventory stays updated
+function InventoryWrapper.suck()
+    if turtle.suck() then
+        InventoryWrapper.updateAfterSuck()
+        return true
+    end
+    return false
+end
+
+function InventoryWrapper.dig()
+    if turtle.dig() then
+        InventoryWrapper.updateAfterSuck()
+        return true
+    end
+    return false
+end
+
+return InventoryWrapper

@@ -87,6 +87,7 @@ function uploadFile(filename)
 
     -- Base64 encode the file content manually
     local encodedContent = base64.encode(content)
+    local encodedContent = urlEncode(encodedContent)
 
     --logMessage("content: " .. content)
     --logMessage("Base64-encoded content: " .. encodedContent)
