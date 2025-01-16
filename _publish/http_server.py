@@ -5,7 +5,7 @@ import base64
 import logging
 
 # Set up logging
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 
 # URL Encoding in Python
 def url_encode(data):
@@ -110,27 +110,36 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         elif self.path.startswith('/download'):
             # Handle file download
-            file_name = self.path[len('/download/'):]  # Extract filename from URL
-            file_path = os.path.join('/ccraft/matejos', file_name)  # Update to the new directory
+            query = self.path[len('/download?'):]  # Extract the query part of the URL
+            params = urllib.parse.parse_qs(query)  # Parse query parameters
+            file_name = params.get('filename', [None])[0]
+            save_dir = os.path.expanduser('~/ccraft/matejos')
+            file_path = os.path.join(save_dir, file_name)  # Update to the correct directory
+
+            # Log the incoming request and resolved file path
+            logging.info(f"Received download request for: ---{self.path}---")
+            logging.info(f"Resolved file path: ---{file_path}---")
+
             if os.path.exists(file_path):
                 try:
                     with open(file_path, 'rb') as f:
                         file_data = f.read()
+                        logging.info(f"Serving file: {file_name} ({len(file_data)} bytes)")
                         self.send_response(200)
                         self.send_header('Content-type', 'application/octet-stream')
-                        self.send_header('Content-Disposition', f'attachment; filename={file_name}')
+                        self.send_header('Content-Disposition', f'attachment; filename={os.path.basename(file_name)}')
                         self.end_headers()
                         self.wfile.write(file_data)
                 except Exception as e:
-                    logging.error(f"Error reading file: {e}")
+                    logging.error(f"Error reading file {file_name}: {e}")
                     self.send_response(500)
                     self.end_headers()
                     self.wfile.write(f"Error reading file: {e}".encode())
             else:
+                logging.error(f"File not found: {file_path}")
                 self.send_response(404)
                 self.end_headers()
                 self.wfile.write(f"File {file_name} not found.".encode())
-
         else:
             super().do_GET()
 
