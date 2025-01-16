@@ -5,7 +5,6 @@ import base64
 import logging
 
 # Set up logging
-#logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.ERROR)
 
 # URL Encoding in Python
@@ -19,12 +18,16 @@ def url_decode(data):
 class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def list_files_recursive(self, directory):
-        # Recursively list all files in the directory and subdirectories
-        file_list = []
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                file_list.append(os.path.relpath(os.path.join(root, file), directory))
-        return file_list
+        files = []
+        for root, dirs, filenames in os.walk(directory):
+            for filename in filenames:
+                filepath = os.path.join(root, filename)
+                file_size = os.path.getsize(filepath)
+                # Convert the absolute path into a relative path
+                relative_path = os.path.relpath(filepath, directory)
+                # We'll store each file as "name|size"
+                files.append(f"{relative_path}|{file_size}")
+        return files
 
     def do_POST(self):
         if self.path == '/upload':
@@ -48,12 +51,11 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
                 try:
                     # Decode file data from base64
                     file_data = base64.b64decode(file_data)
-                    # base64.b64decode(file_data, validate=True)
-                    # file_data = url_decode(file_data)
 
-                    # Ensure the directory to save the file exists
-                    script_dir = os.path.dirname(os.path.abspath(__file__))
-                    save_dir = os.path.join(script_dir, 'cc_data')
+                    # Set the new file path to the desired location
+                    save_dir = os.path.expanduser('~/ccraft/matejos')
+
+                    # Ensure the directory exists
                     os.makedirs(save_dir, exist_ok=True)
 
                     # Define the full path where the file should be saved
@@ -88,15 +90,18 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         # Handle file download and listing
         if self.path == '/files':
-            # List all available files in the 'cc_data' folder, recursively
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            files_dir = os.path.join(script_dir, 'cc_data')
+            save_dir = os.path.expanduser('~/ccraft/matejos')  # Update to the desired directory
             try:
-                files = self.list_files_recursive(files_dir)
+                # Ensure the directory exists
+                os.makedirs(save_dir, exist_ok=True)
+
+                files = self.list_files_recursive(save_dir)
                 self.send_response(200)
-                self.send_header('Content-type', 'application/json')
+                self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(','.join(files).encode())
+                # One file per line
+                response_data = "\n".join(files)
+                self.wfile.write(response_data.encode())
             except Exception as e:
                 logging.error(f"Error listing files: {e}")
                 self.send_response(500)
@@ -106,7 +111,7 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
         elif self.path.startswith('/download'):
             # Handle file download
             file_name = self.path[len('/download/'):]  # Extract filename from URL
-            file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cc_data', file_name)
+            file_path = os.path.join('/ccraft/matejos', file_name)  # Update to the new directory
             if os.path.exists(file_path):
                 try:
                     with open(file_path, 'rb') as f:

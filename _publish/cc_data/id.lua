@@ -1,1 +1,0 @@
-print("This machine ID is " .. os.getComputerID())

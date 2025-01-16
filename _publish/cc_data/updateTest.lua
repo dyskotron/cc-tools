@@ -1,1 +1,0 @@
-print("jedeme brambory")

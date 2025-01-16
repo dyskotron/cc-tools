@@ -1,4 +1,106 @@
-local base64 = require("Modules.base64")
+--------------------------------------------------------------------------
+-- BASE 64 ENCODER
+--------------------------------------------------------------------------
+local base64 = {}
+local base64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+local charAt, indexOf = {}, {}
+
+local blshift = bit32 and bit32.lshift or bit.blshift
+local brshift = bit32 and bit32.rshift or bit.brshift
+local band = bit32 and bit32.band or bit.band
+local bor = bit32 and bit32.bor or bit.bor
+
+for i = 1, #base64chars do
+	local char = base64chars:sub(i,i)
+	charAt[i-1] = char
+	indexOf[char] = i-1
+end
+
+function base64.encode(data)
+	local data = type(data) == "table" and data or {tostring(data):byte(1,-1)}
+
+	local out = {}
+	local b
+	for i = 1, #data, 3 do
+		b = brshift(band(data[i], 0xFC), 2) -- 11111100
+		out[#out+1] = charAt[b]
+		b = blshift(band(data[i], 0x03), 4) -- 00000011
+		if i+0 < #data then
+			b = bor(b, brshift(band(data[i+1], 0xF0), 4)) -- 11110000
+			out[#out+1] = charAt[b]
+			b = blshift(band(data[i+1], 0x0F), 2) -- 00001111
+			if i+1 < #data then
+				b = bor(b, brshift(band(data[i+2], 0xC0), 6)) -- 11000000
+				out[#out+1] = charAt[b]
+				b = band(data[i+2], 0x3F) -- 00111111
+				out[#out+1] = charAt[b]
+			else out[#out+1] = charAt[b].."="
+			end
+		else out[#out+1] = charAt[b].."=="
+		end
+	end
+	return table.concat(out)
+end
+
+function base64.decode(data)
+--	if #data%4 ~= 0 then error("Invalid base64 data", 2) end
+
+	local decoded = {}
+	local inChars = {}
+	for char in data:gmatch(".") do
+		inChars[#inChars+1] = char
+	end
+	for i = 1, #inChars, 4 do
+		local b = {indexOf[inChars[i]],indexOf[inChars[i+1]],indexOf[inChars[i+2]],indexOf[inChars[i+3]]}
+		decoded[#decoded+1] = bor(blshift(b[1], 2), brshift(b[2], 4))%256
+		if b[3] < 64 then decoded[#decoded+1] = bor(blshift(b[2], 4), brshift(b[3], 2))%256
+			if b[4] < 64 then decoded[#decoded+1] = bor(blshift(b[3], 6), b[4])%256 end
+		end
+	end
+	return decoded
+end
+
+--------------------------------------------------------------------------
+-- PROGRESS BAR
+--------------------------------------------------------------------------
+local progressBar = {}
+
+-- Renders a progress bar in the middle of the screen.
+-- progress: 0..1 (0%..100%)
+-- message: short string describing what's happening
+function progressBar.render(progress, message)
+    -- Always clear before drawing the "frame"
+    term.clear()
+    term.setCursorPos(1, 1)
+
+    local w, h = term.getSize()
+
+    -- Position message in the middle (slightly above the bar)
+    local msgX = math.floor((w - #message) / 2) + 1
+    local msgY = math.floor(h / 2) - 1
+    term.setCursorPos(msgX, msgY)
+    term.write(message)
+
+    -- Build the progress bar
+    local barWidth = 30
+    local filled = math.floor(progress * barWidth)
+    local bar = string.rep("=", filled) .. string.rep("-", barWidth - filled)
+
+    -- Center the bar
+    local barX = math.floor((w - (barWidth + 2)) / 2) + 1 -- brackets [ ]
+    local barY = msgY + 1
+    term.setCursorPos(barX, barY)
+    term.write("[" .. bar .. "]")
+
+    -- Show numeric percentage
+    local percent = math.floor(progress * 100)
+    term.write(" " .. percent .. "%")
+end
+
+--------------------------------------------------------------------------
+-- MAIN SYNC CODE
+--------------------------------------------------------------------------
+
 
 -- Configuration
 local SERVER_URL = "http://localhost:8000/"  -- Change to the correct IP if needed
@@ -8,23 +110,22 @@ local LOG_FILE = "sync_log.log"             -- Log file for syncing attempts
 
 -- Function to log messages to the log file
 function logMessage(message)
-    -- Open the log file in append mode to avoid clearing the contents
     local logFile = fs.open(LOG_FILE, "a")
     if logFile then
-        logFile.write(message .. "\n")  -- Add newline for better formatting
+        logFile.write(message .. "\n")
         logFile.close()
     else
         print("Error: Unable to open log file.")
     end
 
-    print(message)
+    --print(message)
 end
 
 -- Function to explicitly clear the contents of the log file
 function clearLogFile()
-    local logFile = fs.open(LOG_FILE, "w")  -- Open in write mode to clear the file
+    local logFile = fs.open(LOG_FILE, "w")
     if logFile then
-        logFile.close()  -- Just close the file to clear its contents
+        logFile.close()
     else
         logMessage("Error: Unable to open log file.")
     end
@@ -53,14 +154,16 @@ function table.contains(tbl, value)
     return false
 end
 
--- Function to URL encode data
+-- Re-define urlEncode to handle spaces
 function urlEncode(str)
     return str:gsub("([^%w %-%_%.%~])", function(c)
         return string.format("%%%02X", string.byte(c))
     end):gsub(" ", "+")
 end
 
--- Function to upload a file to the server (with manual Base64 encoding and URL encoding)
+--------------------------------------------------------------------------
+-- UPLOAD LOGIC (unchanged)
+--------------------------------------------------------------------------
 function uploadFile(filename)
     logMessage("Preparing to upload file: " .. filename)
 
@@ -71,38 +174,19 @@ function uploadFile(filename)
     end
 
     local content = file.readAll()
-
-    -- Log the file size
-        logMessage("File size: " .. #content .. " bytes")
-
-    -- Check for non-ASCII characters
-    for i = 1, #content do
-        local byte = string.byte(content, i)
-        if byte > 127 then
-            print("Non-ASCII character found: ", byte)
-        end
-    end
-
     file.close()
 
-    -- Base64 encode the file content manually
+    logMessage("File size: " .. #content .. " bytes")
+
     local encodedContent = base64.encode(content)
-    local encodedContent = urlEncode(encodedContent)
+    encodedContent = urlEncode(encodedContent)
 
-    --logMessage("content: " .. content)
-    --logMessage("Base64-encoded content: " .. encodedContent)
-
-    -- URL encode the filename but NOT the content
     local encodedFilename = urlEncode(filename)
-
-    -- Prepare the POST data (only base64-encoded content, not URL encoded)
     local data = "filename=" .. encodedFilename .. "&data=" .. encodedContent
 
-    -- Log the POST data for debugging
     logMessage("POST data: " .. data)
 
-    -- Create a POST request and send the file to the server
-    local url = SERVER_URL .. "upload"  -- Replace with the correct server IP
+    local url = SERVER_URL .. "upload"
     local headers = {
         ["Content-Type"] = "application/x-www-form-urlencoded",
         ["Content-Length"] = tostring(#data)
@@ -111,7 +195,7 @@ function uploadFile(filename)
     logMessage("Sending POST request...")
     local response, statusCode = http.post(url, data, headers)
     if response then
-        logMessage("Response Code: " .. tostring(statusCode))    -- Log response code
+        logMessage("Response Code: " .. tostring(statusCode))
         logMessage("File uploaded successfully: " .. filename)
     else
         logMessage("Error: Failed to upload " .. filename)
@@ -119,26 +203,22 @@ function uploadFile(filename)
     end
 end
 
--- Function to upload all .lua files (excluding the "rom" folder)
 function uploadAllFiles()
-    local files = fs.list("/")  -- List the files in the root directory
-
+    local files = fs.list("/")
     if not files then
         local errorMsg = "Error: Unable to list files in the root directory"
         logMessage(errorMsg)
-        return
+        return {}
     end
 
     local uploadedFiles = {}
 
     for _, filename in ipairs(files) do
-        -- Skip the "rom" folder and only upload .lua files
         if filename ~= "rom" then
             if string.match(filename, "%.lua$") then
                 uploadFile(filename)
                 table.insert(uploadedFiles, filename)
             elseif fs.isDir(filename) then
-                -- Recursively upload files in subdirectories (skip "rom" folder)
                 uploadAllFilesInDirectory(filename, uploadedFiles)
             end
         end
@@ -147,10 +227,8 @@ function uploadAllFiles()
     return uploadedFiles
 end
 
--- Function to scan subdirectories and upload .lua files (excluding "rom")
 function uploadAllFilesInDirectory(directory, uploadedFiles)
     local files = fs.list(directory)
-
     if not files then
         local errorMsg = "Error: Unable to list files in directory: " .. directory
         logMessage(errorMsg)
@@ -158,48 +236,64 @@ function uploadAllFilesInDirectory(directory, uploadedFiles)
     end
 
     for _, filename in ipairs(files) do
-        -- Skip the "rom" folder and only upload .lua files
         if filename ~= "rom" then
             if string.match(filename, "%.lua$") then
                 uploadFile(directory .. "/" .. filename)
                 table.insert(uploadedFiles, directory .. "/" .. filename)
             elseif fs.isDir(directory .. "/" .. filename) then
-                -- Recursively scan subdirectories
                 uploadAllFilesInDirectory(directory .. "/" .. filename, uploadedFiles)
             end
         end
     end
 end
 
--- Function to download a file
+--------------------------------------------------------------------------
+-- DOWNLOAD LOGIC
+--------------------------------------------------------------------------
 function downloadFile(filename)
     local url = SERVER_URL .. DOWNLOAD_PATH .. "?filename=" .. filename
     local response = http.get(url)
-    if response then
-        local data = response.readAll()
-        response.close()
-
-        -- Extract the directory from the filename
-        local dir = fs.getDir(filename)
-        logMessage("target directory: " ..  dir)
-        if not fs.exists(dir) then
-            -- Create the directory if it doesn't exist
-            fs.makeDir(dir)
-            logMessage("creating directory: " ..  dir)
-        end
-
-        -- Open the file for writing
-        local file = fs.open(filename, "w")
-        if file then
-            file.write(data)
-            file.close()
-            logMessage("Downloaded: " .. filename)
-        else
-            logMessage("Failed to write " .. filename)
-        end
-    else
+    if not response then
         logMessage("Failed to download " .. filename)
+        return
     end
+
+    local data = response.readAll()
+    response.close()
+
+    -- Create the directory if necessary
+    local dir = fs.getDir(filename)
+    if not fs.exists(dir) then
+        fs.makeDir(dir)
+    end
+
+    -- Write in chunks, rendering progress bar for ~6 seconds
+    local totalBytes = #data
+    local chunkCount = 60
+    local chunkSize = math.max(1, math.floor(totalBytes / chunkCount))
+
+    local file = fs.open(filename, "w")
+    if not file then
+        logMessage("Failed to write " .. filename)
+        return
+    end
+
+    local downloaded = 0
+    for i = 1, totalBytes, chunkSize do
+        local chunk = data:sub(i, i + chunkSize - 1)
+        file.write(chunk)
+        downloaded = downloaded + #chunk
+
+        -- Update progress bar
+        local progress = math.min(downloaded / totalBytes, 1.0)
+        progressBar.render(progress, "Downloading: " .. filename)
+
+        sleep(0.1) -- Adjust timing for desired effect
+    end
+    file.close()
+
+    -- Log download completion
+    logMessage("Downloaded: " .. filename)
 end
 
 -- Function to download all files
@@ -209,15 +303,19 @@ function downloadAllFiles(uploadedFiles)
     end
 end
 
+--------------------------------------------------------------------------
+-- TRIM HELPER
+--------------------------------------------------------------------------
 function trim(s)
     return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
+--------------------------------------------------------------------------
+-- MAIN
+--------------------------------------------------------------------------
 function main()
-
     clearLogFile()
 
-    -- Accessing arguments
     local args = {}
     if #arg > 0 then
         for i, v in ipairs(arg) do
@@ -229,60 +327,36 @@ function main()
         -- Upload files
         logMessage("Sync started. Uploading files...\n")
         local uploadedFiles = uploadAllFiles()
-
         if #uploadedFiles > 0 then
             logMessage("Sync completed. Files uploaded.\n")
         else
             logMessage("Error: No files uploaded.\n")
         end
+
     else
-        -- Download files
-        logMessage("Sync started. Downloading files...\n")
+        -- Download and update files
+        logMessage("Sync started. Updating files...\n")
 
-        -- Get list of files to download (from the server)
-        local url = SERVER_URL .. "/files"
-        local response = http.get(url)
+        -- 1) Get comma-separated list of files from the server
+        local listUrl = SERVER_URL .. "/files"
+        local listResponse = http.get(listUrl)
+        if listResponse then
+            local raw_data = listResponse.readAll()
+            listResponse.close()
 
-        if response then
-            local raw_data = response.readAll()  -- Get the raw response data
-            response.close()
-
-            -- Log the raw response for debugging
             logMessage("Server response: " .. raw_data .. "\n")
 
-            -- Parse the comma-separated list of files
+            -- 2) Parse comma-separated list into a table
             local files = {}
             for filename in raw_data:gmatch("([^,]+)") do
-                filename = trim(filename)  -- Remove leading/trailing spaces
+                filename = trim(filename)
                 table.insert(files, filename)
             end
 
-            -- Check if 'files' is valid
+            -- 3) Update each file with the latest version
             if files then
-                for _, filename in ipairs(files) do
-                    logMessage("Downloading " .. filename .. "...\n")
-
-                    -- Download each file
-                    local download_url = SERVER_URL .. "/download/" .. filename
-                    local file_response = http.get(download_url)
-
-                    if file_response then
-                        local data = file_response.readAll()
-                        file_response.close()
-
-                        -- Save the file locally
-                        local file = fs.open(filename, "w")
-                        if file then
-                            file.write(data)
-                            file.close()
-                            logMessage("File " .. filename .. " downloaded successfully.\n")
-                        else
-                            logMessage("Failed to write " .. filename .. ".\n")
-                        end
-                    else
-                        logMessage("Error: Unable to download " .. filename .. ".\n")
-                    end
-                end
+                downloadAllFiles(files)
+                logMessage("All files updated successfully.\n")
             else
                 logMessage("Error: Invalid file list received from server.\n")
             end
@@ -291,6 +365,7 @@ function main()
         end
     end
 end
+
 
 -- Run the main function
 main()
