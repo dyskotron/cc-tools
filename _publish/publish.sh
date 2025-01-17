@@ -16,7 +16,7 @@ if [ ! -d "$DEST_DIR" ]; then
 fi
 
 # Use rsync to copy all .lua files from the source directory, excluding the _publish folder
-rsync -av --exclude="_publish" --include="*/" --include="*.lua" --exclude="*" "$SOURCE_DIR/" "$DEST_DIR"
+rsync -av --prune-empty-dirs --exclude="_publish" --include="*/" --include="*.lua" --exclude="*" "$SOURCE_DIR/" "$DEST_DIR/"
 
 # Verify the operation and provide feedback
 if [ $? -eq 0 ]; then

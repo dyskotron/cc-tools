@@ -1,4 +1,4 @@
-local menu = require("modules.menulib")
+local menu = require("Modules.ui.menulib")
 
 local function logError(message)
     local logFile = fs.open("error_log.txt", "a") -- Open the file in append mode

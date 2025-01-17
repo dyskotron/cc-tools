@@ -1,22 +1,5 @@
 local menu = {}
 
-function menu.tableToString(t, indent)
-    indent = indent or 0
-    local indentString = string.rep(" ", indent)
-    local result = ""
-
-    for key, value in pairs(t) do
-        if type(value) == "table" then
-            result = result .. indentString .. tostring(key) .. ":\n"
-            result = result .. menu.tableToString(value, indent + 1)
-        else
-            result = result .. indentString .. tostring(key) .. ": " .. tostring(value) .. "\n"
-        end
-    end
-
-    return result
-end
-
 function menu.writeFromBottom(message, bottomOffset, xOffset)
 
     bottomOffset = bottomOffset or 0

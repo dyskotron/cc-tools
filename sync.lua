@@ -1,7 +1,7 @@
 local base64 = require("Modules.base64")
-local progressBar = require("Modules.progressBar")
+local progressBar = require("Modules.ui.progressBar")
 local stringUtils = require("Modules.stringUtils")
-local logger = require("Modules.simpleLogger")
+local logger = require("Modules.ui.logger")
 
 -- Configuration
 local SERVER_URL = "http://localhost:8000/"  -- Change to the correct IP if needed
