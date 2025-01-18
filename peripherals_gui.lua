@@ -1,21 +1,5 @@
 local menu = require("Modules.ui.menulib")
-
-local function logError(message)
-    local logFile = fs.open("error_log.txt", "a") -- Open the file in append mode
-    if logFile then
-        logFile.writeLine(os.date("%Y-%m-%d %H:%M:%S") .. " - " .. tostring(message))
-        logFile.close()
-    else
-        print("Failed to open log file!")
-    end
-end
-
-local function logInfo(message)
-    local file = fs.open("debug_log.txt", "a")
-    file.writeLine(os.date() .. " - " .. message)
-    file.close()
-    print(message)  -- Also print it to the terminal for real-time feedback
-end
+local logger = require("Modules.utils.logger")
 
 --==================================================================================================================================
 
@@ -58,13 +42,13 @@ end
 local function getInputAsInt(prompt)
     -- Display prompt
     write(prompt)
-    
+
     -- Get user input as a string
     local input = read()
-    
+
     -- Try to convert the input to an integer
     local number = tonumber(input)
-    
+
     -- Check if the conversion succeeded
     if number then
         return number
@@ -76,20 +60,20 @@ end
 
 -- handle all inventory methods
 local function handleCustomMethod(deviceName, methodName, params)
-    
+
     local device = peripheral.wrap(deviceName)
-    
+
     -- Define custom handlers for specific methods here
     if methodName == "list" then
-        
+
         local device = peripheral.wrap(deviceName)
         local content = device.list()
-        
+
         local itemsPrompt = "Inventory is empty"
         if not (#content == 0) then
             itemsPrompt = menu.tableToString(content)
         end
-        
+
         return {
             prompt = itemsPrompt,
             options = {},
@@ -98,12 +82,12 @@ local function handleCustomMethod(deviceName, methodName, params)
     elseif methodName == "getItemDetail" then
         local slot = getInputAsInt("Enter Slot Number:")
         local itemDetail = device.getItemDetail(slot)
-        
+
         local itemsPrompt = "No Item in slot " .. slot
         if not (itemDetail == nil) then
             itemsPrompt = menu.tableToString(itemDetail)
         end
-        
+
         return {
             prompt = itemsPrompt,
             options = {},
@@ -120,16 +104,16 @@ end
 
 -- Dynamically generate the screens
 local function getScreen(index, data)
-    logInfo("getScreen - index:" .. tostring(index) .. "data:" .. tostring(data))
-    
+    logger.info("getScreen - index:{} data: {}", index, data)
+
     if index == 1 then
-        
-            logError("Unhandled error: " .. tostring(err))
+
+            logger.error("Unhandled error: " .. tostring(err))
             -- Main screen: List all devices
             local devices = peripheralGui.getDevices()
             local options = {}
             local callbacks = {}
-    
+
             -- Create options and callbacks dynamically based on the devices
             for i, device in ipairs(devices) do
                 -- Get the device type using peripheral.getType
@@ -142,7 +126,7 @@ local function getScreen(index, data)
                     return getScreen(2, { deviceName = device })
                 end
             end
-    
+
             return {
                 prompt = "Select a Device:",
                 options = options,
@@ -154,7 +138,7 @@ local function getScreen(index, data)
         -- Device methods screen
         local deviceName = data.deviceName
         local methods = peripheralGui.getMethods(deviceName)
-        
+
         if not methods or #methods == 0 then
             return {
                 prompt = "No methods found for " .. deviceName,
@@ -162,10 +146,10 @@ local function getScreen(index, data)
                 callbacks = {}  -- No need to define callbacks for the "Back" option
             }
         end
-    
+
         local options = {}
         local callbacks = {}
-        
+
         -- Dynamically generate options and callbacks for each method
             for i, method in ipairs(methods) do
                 table.insert(options, method)
@@ -181,7 +165,7 @@ local function getScreen(index, data)
                     end
                 end
             end
-    
+
         return {
             prompt = "Methods for " .. deviceName .. ":",
             options = options,
@@ -193,7 +177,7 @@ local function getScreen(index, data)
         -- Parameter input and execution screen
         local deviceName = data.deviceName
         local methodName = data.methodName
-        logInfo("getScreen - Parameter input and execution screen - deviceName:" .. tostring(deviceName) .. "methodName:" .. tostring(methodName))
+        logger.info("getScreen - Parameter input and execution screen - deviceName:" .. tostring(deviceName) .. "methodName:" .. tostring(methodName))
 
         return {
             prompt = "Execute " .. methodName .. " on " .. deviceName .. ":\nProvide parameters (comma-separated):",
