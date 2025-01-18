@@ -3,6 +3,7 @@ ListView = require("Modules.ui.listView")
 tableUtils = require("Modules.utils.tableUtils")
 logger = require("Modules.utils.logger")
 dirUtils = require("Modules.utils.dirUtils")
+keyReceiver = require("Modules.keyReceiver")
 
 -- Initialize the two lists
 local w, h = term.getSize()
@@ -109,7 +110,9 @@ local function main()
 end
 
 logger.init(false, true, true)
-logger.info("info test")
-logger.warn("warn test")
-logger.error("error test {error}", "heyy i am error test")
-logger.runWithLog(main())
+
+
+parallel.waitForAny(
+    function() keyReceiver.start(1) end,
+    function() logger.runWithLog(main()) end
+)
