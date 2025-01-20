@@ -1,6 +1,7 @@
-local inventorywrapper = require("Modules.InventoryWrapper")
+local inventoryWrapper = require("Modules.InventoryWrapper")
 local logger = require("Modules.utils.logger")
 local traverseHelper = require("Modules.traverseHelper")
+local stringUtils = require("Modules.utils.stringUtils")
 
 -- Function to parse the binary .dat file
 local function parseDatFile(filename)
@@ -19,7 +20,7 @@ local function parseDatFile(filename)
     local planes = {}
     for _ = 1, voxel_count do
         local x, y, z, color = string.unpack("<BBBB", file.read(4))
-        planes[z + 1] = planes[z + 1] or {} -- Lua indices start at 1
+        planes[z + 1] = planes[z + 1] or {}
         planes[z + 1][y + 1] = planes[z + 1][y + 1] or {}
         table.insert(planes[z + 1][y + 1], { x = x, color = color })
     end
@@ -33,25 +34,38 @@ local function parseDatFile(filename)
     }
 end
 
--- Position update callback for traverseHelper
+-- Update callback
 local function myPosUpdate(position, area, context)
     logger.info("New position: X={}, Y={}, Z={}", position.x, position.y, position.z)
     turtle.digDown()
 
-    -- Only place a block if there is a voxel at this position
-    local plane = context.model.planes[position.z + 1] -- Lua indices start at 1
-    if plane and plane[position.y + 1] then
-        for _, voxel in ipairs(plane[position.y + 1]) do
-            if voxel.x == position.x then
-                turtle.select(context.blockSlot)
-                if turtle.placeDown() then
-                    logger.info("Placed block at X={}, Y={}, Z={}", position.x, position.y, position.z)
-                else
-                    logger.warn("Failed to place block at X={}, Y={}, Z={}", position.x, position.y, position.z)
-                end
-                break
-            end
-        end
+    -- Get the plane and row
+    local plane = context.model.planes[position.z]
+    if not plane then
+        return
+    end
+
+    local row = plane[position.y]
+    if not row then
+        return
+    end
+
+    local voxel = row[position.x]
+    if not voxel then
+        return
+    end
+
+    local slot = inventoryWrapper.getAnyBlockSlot();
+    if not slot then
+        logger.warn("no block available in inventory")
+        return
+    end
+
+    inventoryWrapper.select(slot)
+    if turtle.placeDown() then
+        logger.info("Placed block at X={}, Y={}, Z={}", position.x, position.y, position.z)
+    else
+        logger.warn("Failed to place block at X={}, Y={}, Z={}", position.x, position.y, position.z)
     end
 end
 
@@ -60,12 +74,11 @@ local function buildStructure(datFile)
     logger.info("Starting build from file: {}", datFile)
     local model = parseDatFile(datFile)
 
-    inventorywrapper.init()
+    inventoryWrapper.init()
     logger.info("Inventory wrapper initialized.")
 
     -- Context for traverseHelper
     local context = {
-        blockSlot = inventorywrapper.getItemAt(1), -- Use any block from slot 1
         model = model
     }
 
@@ -81,7 +94,9 @@ local function buildStructure(datFile)
     logger.info("Build completed for file: {}", datFile)
 end
 
-local datFile = "vox_data/8x8x8.dat"
+--local datFile = "vox_data/8x8x8.dat"
+--local datFile = "vox_data/test_shape_33.dat"
+local datFile = "vox_data/tst44.dat"
 
 logger.init(true, true, true, "/voxBuilder.log")
 logger.runWithLog(function() buildStructure(datFile) end)

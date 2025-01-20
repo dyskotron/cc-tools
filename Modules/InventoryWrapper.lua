@@ -66,6 +66,18 @@ function InventoryWrapper.getEmptySlot(exclude)
     return nil -- Return nil if no empty slot is found
 end
 
+function InventoryWrapper.getAnyBlockSlot()
+    -- Iterate over the inventory slots
+    for slot = 1, 16 do
+        -- Check if the slot is empty and not the excluded reserved slot
+        if inventory[slot] then
+            logger.info("InventoryWrapper:found slot with block: " .. inventory[slot].name)
+            return slot
+        end
+    end
+    return nil -- Return nil if no slot with blc
+end
+
 function InventoryWrapper.getShulkerItemName(slot)
     -- Check if the slot exists in the inventory and contains a shulker
     local item = inventory[slot]

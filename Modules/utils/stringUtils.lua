@@ -33,7 +33,7 @@ function stringUtils.tableToString(t, indent)
     for key, value in pairs(t) do
         if type(value) == "table" then
             result = result .. indentString .. tostring(key) .. ":\n"
-            result = result .. menu.tableToString(value, indent + 1)
+            result = result .. stringUtils.tableToString(value, indent + 1)
         else
             result = result .. indentString .. tostring(key) .. ": " .. tostring(value) .. "\n"
         end

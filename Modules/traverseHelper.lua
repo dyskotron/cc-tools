@@ -73,7 +73,9 @@ function traverseHelper.traverseX(transform, targetX, area, posUpdate, context)
         for i = 1, math.abs(deltaX) do
             traverseHelper.moveForwardDestructive()
             transform.position.x = transform.position.x + (deltaX > 0 and 1 or -1)
-            posUpdate(transform.position, area, context)
+            if posUpdate then
+                posUpdate(transform.position, area, context)
+            end
         end
     end
     return transform
