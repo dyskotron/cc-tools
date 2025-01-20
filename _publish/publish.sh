@@ -2,7 +2,7 @@
 
 # Define the source and destination directories
 SOURCE_DIR="/Users/matejosanec/IdeaProjects/lua test"
-DEST_DIR="/Users/matejosanec/Documents/curseforge/minecraft/Instances/Prominence II RPG_ Hasturian Era/saves/ComputerCraft tests/computercraft/computer/3"
+DEST_DIR="/Users/matejosanec/Documents/curseforge/minecraft/Instances/Prominence II RPG_ Hasturian Era/saves/ComputerCraft tests/computercraft/computer/22"
 
 # Check if the source directory exists
 if [ ! -d "$SOURCE_DIR" ]; then

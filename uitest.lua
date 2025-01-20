@@ -23,7 +23,7 @@ local lastSelection = { left = 1, right = 1 } -- Store last selected index for e
 
 local function runLuaFile(filepath)
     local success, err = pcall(function()
-        shell.run(filepath) -- Run the .lua file
+        logger.runWithLog(filepath)
     end)
     if not success then
         print("Error running file: " .. err)

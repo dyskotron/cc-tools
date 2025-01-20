@@ -1,5 +1,5 @@
-local menu = require("Modules.menulib")
-local logger = require("Modules.logger")
+local menu = require("Modules.ui.menulib")
+local logger = require("Modules.utils.logger")
 
 local InventoryWrapper = {}
 

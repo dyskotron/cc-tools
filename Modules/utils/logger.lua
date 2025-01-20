@@ -86,17 +86,20 @@ function logger.error(message, ...)
     writeLog("ERROR", message, ...)
 end
 
--- Execute a Lua program and log its outcome
-function logger.runWithLog(filepath)
-    logger.info("Executing: {}", filepath)
-    local success, err = pcall(function()
+function logger.runWithLog(func)
+    logger.info("Executing: function")
+    local success, err = pcall(func)
+    if not success then
+        logger.error("Error while executing function: {}", err)
+    else
+        logger.info("Execution completed successfully.")
+    end
+end
+
+function logger.runFileWithLogger(filepath)
+    logger.runWithLog(function()
         shell.run(filepath)
     end)
-    if not success then
-        logger.error("Error while executing {}: {}", filepath, err)
-    else
-        logger.info("Execution completed successfully: {}", filepath)
-    end
 end
 
 -- Close the log file (should be called on program exit if writing to a file)

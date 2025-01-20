@@ -1,7 +1,7 @@
-local menu = require("Modules.menulib")
+local menu = require("Modules.ui.menulib")
 local traverseHelper = require("Modules.traverseHelper")
 local inventorywrapper = require("Modules.InventoryWrapper")
-local logger = require("Modules.logger")
+local logger = require("Modules.utils.logger")
 
 local lightDistance = 3
 
