@@ -59,6 +59,39 @@ class VoxFileParser:
                 stacks = count // 64 + (1 if count % 64 > 0 else 0)
                 log_file.write(f"  Color {color}: {count} voxels ({stacks} stack{'s' if stacks > 1 else ''})\n")
 
+    def test_dat_file(self, dat_path):
+        with open(dat_path, 'rb') as f:
+            # Read header
+            length = struct.unpack('<I', f.read(4))[0]
+            width = struct.unpack('<I', f.read(4))[0]
+            height = struct.unpack('<I', f.read(4))[0]
+            voxel_count = struct.unpack('<I', f.read(4))[0]
+
+            print(f"Dimensions: {length}x{width}x{height}, Voxel count: {voxel_count}")
+
+            # Read and group voxels by Z-layer
+            layers = {}
+            for _ in range(voxel_count):
+                x, y, z, color = struct.unpack('<BBBB', f.read(4))
+                if z not in layers:
+                    layers[z] = []
+                layers[z].append((x, y, z, color))
+
+            # Print grouped voxels
+            for z in sorted(layers):
+                print(f"LAYER {z}:")
+                for voxel in layers[z]:
+                    x, y, z, color = voxel
+                    print(f"  Voxel - X: {x}, Y: {y}, Z: {z}, Color: {color}")
+
+            # Find minimum and maximum voxels
+            all_voxels = [voxel for layer in layers.values() for voxel in layer]
+            min_voxel = min(all_voxels, key=lambda v: (v[2], v[1], v[0]))
+            max_voxel = max(all_voxels, key=lambda v: (v[2], v[1], v[0]))
+
+            print(f"Lowest voxel: X: {min_voxel[0]}, Y: {min_voxel[1]}, Z: {min_voxel[2]}")
+            print(f"Highest voxel: X: {max_voxel[0]}, Y: {max_voxel[1]}, Z: {max_voxel[2]}")
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python script.py <path_to_vox_file>")
@@ -76,3 +109,6 @@ if __name__ == "__main__":
     parser.parse()
     parser.export_to_dat(output_path)
     print(f"Model exported to {output_path}")
+
+    # Test the .dat file
+    parser.test_dat_file(output_path)

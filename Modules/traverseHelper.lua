@@ -89,7 +89,9 @@ function traverseHelper.traverseY(transform, targetY, area, posUpdate, context)
         for i = 1, math.abs(deltaY) do
             traverseHelper.moveForwardDestructive()
             transform.position.y = transform.position.y + (deltaY > 0 and 1 or -1)
-            posUpdate(transform.position, area, context)
+            if posUpdate then
+                posUpdate(transform.position, area, context)
+            end
         end
     end
     return transform
@@ -107,7 +109,9 @@ function traverseHelper.traverseZ(transform, targetZ, area, posUpdate, context)
                 traverseHelper.moveDownDestructive()
                 transform.position.z = transform.position.z - 1
             end
-            posUpdate(transform.position, area, context)
+            if posUpdate then
+                posUpdate(transform.position, area, context)
+            end
         end
     end
     return transform
@@ -135,7 +139,9 @@ function traverseHelper.traverseArea(maxX, maxY, maxZ, posUpdate, context)
     local yReversed = false
     local transform = { position = position, direction = 0 }  -- The transformation table
 
-    posUpdate(position, area, context)
+    if posUpdate then
+        posUpdate(transform.position, area, context)
+    end
 
     for z = 1, maxZ do
         for y = 1, maxY do
@@ -156,8 +162,9 @@ function traverseHelper.traverseArea(maxX, maxY, maxZ, posUpdate, context)
     end
 
     print("Traversal complete!")
-    transform = traverseHelper.traverseX(transform, -1, nil, nil)
-    transform = traverseHelper.traverseY(transform, 0, nil, nil)
+
+    transform = traverseHelper.traverseY(transform, 1, nil, nil)
+    transform = traverseHelper.traverseX(transform, 0, nil, nil)
     transform = traverseHelper.traverseZ(transform, 0, nil, nil)
 end
 

@@ -4,6 +4,7 @@ local logFilePath
 local writeToTerminal
 local writeToFile
 local fileHandle
+local initialized = false -- Tracks if the logger has been initialized
 
 -- Get a timestamp for log entries
 local function getTimestamp()
@@ -23,7 +24,6 @@ end
 
 -- Internal function to write a log entry with a level
 local function writeLog(level, message, ...)
-    -- Interpolate the message with the provided values
     local interpolatedMessage = interpolateOrdered(message, ...)
     local logEntry = string.format("[%s] [%s] %s", getTimestamp(), level, interpolatedMessage)
 
@@ -40,14 +40,35 @@ local function writeLog(level, message, ...)
     end
 end
 
+-- Ensure the /log directory exists
+local function ensureLogDirectory()
+    if not fs.exists("/log") then
+        fs.makeDir("/log")
+    end
+end
+
+-- Adjust the log file path to be under the /log subfolder
+local function adjustLogFilePath(path)
+    ensureLogDirectory()
+    if not path then
+        return "/log/log.txt"
+    end
+    -- Prepend "/log" to the given path
+    return "/log/" .. path:gsub("^/log/", "") -- Avoid double /log prefix
+end
+
 -- Initialize the logger (detailed configuration)
 function logger.initWithParams(config)
-    logFilePath = config.logFilePath or "log.txt" -- Default file path
+    if initialized then
+        error("Logger has already been initialized.")
+    end
+
+    initialized = true
+    logFilePath = adjustLogFilePath(config.logFilePath)
     writeToTerminal = config.writeToTerminal ~= false -- Default to true
     writeToFile = config.writeToFile ~= false -- Default to true
 
     if writeToFile then
-        -- Open the log file in the appropriate mode
         local mode = config.clearLog and "w" or "a"
         fileHandle = fs.open(logFilePath, mode)
 
@@ -55,10 +76,9 @@ function logger.initWithParams(config)
             error("Failed to open log file: " .. logFilePath)
         end
 
-        -- If appending, add a visual separator
         if mode == "a" then
             fileHandle.write("\n=== New Log Start ===\n")
-            fileHandle.flush() -- Ensure the separator is written
+            fileHandle.flush()
         end
     end
 end
@@ -66,10 +86,10 @@ end
 -- Simplified initialization with optional parameters
 function logger.init(writeToTerminal, writeToFile, clearLog, logFilePath)
     logger.initWithParams({
-        logFilePath = logFilePath or "log.txt", -- Default file name
-        writeToTerminal = writeToTerminal, -- Use as is
-        writeToFile = writeToFile, -- Use as is
-        clearLog = clearLog ~= false -- Default to false
+        logFilePath = logFilePath or "log.txt",
+        writeToTerminal = writeToTerminal,
+        writeToFile = writeToFile,
+        clearLog = clearLog ~= false
     })
 end
 
@@ -86,8 +106,9 @@ function logger.error(message, ...)
     writeLog("ERROR", message, ...)
 end
 
+-- Run a function and log its execution
 function logger.runWithLog(func)
-    logger.info("Executing: function")
+    logger.info("Executing function")
     local success, err = pcall(func)
     if not success then
         logger.error("Error while executing function: {}", err)
@@ -96,6 +117,7 @@ function logger.runWithLog(func)
     end
 end
 
+-- Run a file with logging
 function logger.runFileWithLogger(filepath)
     logger.runWithLog(function()
         shell.run(filepath)

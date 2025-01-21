@@ -1,10 +1,22 @@
-local menu = require("Modules.ui.menulib")
 local logger = require("Modules.utils.logger")
+local stringUtils = require("Modules.utils.stringUtils")
 
 local InventoryWrapper = {}
 
 local inventory = {}
 local selectedSlot = 1 -- Track the currently selected slot
+
+local function place(itemName, placeMethod, autoSelect)
+    autoSelect = autoSelect ~= false
+    if not autoSelect or InventoryWrapper.select(itemName, true) then
+        placeMethod()
+        InventoryWrapper.updateAfterPlace()
+        return true
+    end
+
+    logger.warning("InventoryWrapper: Can't place block with name: " .. itemName)
+    return false
+end
 
 -- Initialize the inventory table
 function InventoryWrapper.init()
@@ -39,17 +51,6 @@ function InventoryWrapper.printInventory()
     for slot, item in pairs(inventory) do
         if item then
             print(item.name .. "(" .. item.count .. ")")
-        end
-    end
-end
-
-function InventoryWrapper.printShulkers()
-    print("Inventory Contents:")
-    for slot, item in pairs(inventory) do
-        if item then
-            if item.shulkerItem then
-                print(item.name .. "(" .. item.shulkerItem .. ")")
-            end
         end
     end
 end
@@ -90,6 +91,10 @@ end
 
 -- Select a slot containing the specified item, optionally loading from shulker boxes
 function InventoryWrapper.select(itemName, tryLoadFromShulker)
+    if inventory[selectedSlot].name == itemName and inventory[selectedSlot].count > 0 then
+        return true
+    end
+
     -- First, check the inventory for the item
     for slot, item in pairs(inventory) do
         if item.name == itemName then
@@ -97,17 +102,17 @@ function InventoryWrapper.select(itemName, tryLoadFromShulker)
                 turtle.select(slot)
                 selectedSlot = slot
             end
-            logger.log("InventoryWrapper.select() found item " .. itemName .. " directly in inventory")
+            logger.info("InventoryWrapper.select() found item " .. itemName .. " directly in inventory")
             return true
         end
     end
 
     -- If the item is not found and tryLoadFromShulker is true, load from shulker
     if tryLoadFromShulker then
-        logger.log("InventoryWrapper.select() trying to load " .. itemName .. " from shulker")
+        logger.info("InventoryWrapper.select() trying to load " .. itemName .. " from shulker")
         if InventoryWrapper.tryLoadFromShulker(itemName) then
             -- Retry selecting the item after loading
-            logger.log("InventoryWrapper.select() Retry selecting  " .. itemName .. " after sucesfull loading")
+            logger.info("InventoryWrapper.select() Retry selecting  " .. itemName .. " after sucesfull loading")
             return InventoryWrapper.select(itemName, false)
         end
     end
@@ -122,7 +127,7 @@ function InventoryWrapper.tryLoadFromShulker(itemName)
     for slot, item in pairs(inventory) do
         if item.name:find("shulker_box") and item.shulkerItem == itemName and item.shulkerStacks > 0 then
             -- Shulker confirmed, place it, suck the item, and dig it back
-            logger.log("InventoryWrapper.select() found item " .. itemName .. " in shulker box")
+            logger.info("InventoryWrapper.select() found item " .. itemName .. " in shulker box")
             return InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.suckUp})
         end
     end
@@ -130,7 +135,7 @@ function InventoryWrapper.tryLoadFromShulker(itemName)
     -- If item not found, lazily check unconfirmed shulkers
     for slot, item in pairs(inventory) do
         if item.name:find("shulker_box") and not item.shulkerItem then
-            logger.log("InventoryWrapper.select() checking shulker box")
+            logger.info("InventoryWrapper.select() checking shulker box")
             if InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.initShulkerData, InventoryWrapper.checkForItem, InventoryWrapper.suckUp}, itemName) then -- need to add the extra param here
                 return true
             end
@@ -169,7 +174,7 @@ function InventoryWrapper.placeAndProcessShulker(shulkerSlot, methods, metaData)
 end
 
 function InventoryWrapper.checkForItem(shulkerSlot, targetItem)
-    logger.log("InventoryWrapper.checkForItem() checking shulker content:" .. InventoryWrapper.getShulkerItemName(shulkerSlot) .. "target Item is " .. targetItem)
+    logger.info("InventoryWrapper.checkForItem() checking shulker content:" .. InventoryWrapper.getShulkerItemName(shulkerSlot) .. "target Item is " .. targetItem)
     return InventoryWrapper.getShulkerItemName(shulkerSlot) == targetItem
 end
 
@@ -181,7 +186,7 @@ function InventoryWrapper.suckUp(shulkerSlot)
     if turtle.suckUp() then
         InventoryWrapper.updateSlot(itemSlot)
     else
-        logger.log("cant suck from shulker")
+        logger.info("cant suck from shulker")
     end
 
     return true
@@ -208,17 +213,14 @@ end
 
 function InventoryWrapper.initShulkerData(shulkerSlot)
 
-    logger.log("InventoryWrapper.initShulkerData() found item in shulker - updating inventory data")
+    logger.info("InventoryWrapper.initShulkerData() found item in shulker - updating inventory data")
     -- Wrap the shulker box as a peripheral
     --local shulker = peripheral.wrap("top")
     local shulker = InventoryWrapper.wrapShulkerWithRetry(10,0.5)
     if not shulker then
-        print("Can't wrap placed shulker")
-        print(tostring(peripheral.getNames()))
-        print(peripheral.getType("top"))
-        print(#peripheral.getNames())
-        print(menu.tableToString(peripheral.getNames(), indent))
-        exit()
+        logger.warning("Can't wrap placed shulker")
+        logger.warning("top device:" .. peripheral.getType("top"))
+        logger.warning("all devices(" .. #peripheral.getNames() .."): " .. stringUtils.tableToString(peripheral.getNames()))
         return false -- Failed to wrap the shulker box
     end
 
@@ -266,22 +268,9 @@ function InventoryWrapper.selectSlot(slot)
     end
 end
 
--- Place an item and update inventory
-function InventoryWrapper.place()
-    if turtle.place() then
-        updateAfterPlace()
-        return true
-    end
-    return false
-end
-
-function InventoryWrapper.placeDown()
-    if turtle.placeDown() then
-        InventoryWrapper.updateAfterPlace()
-        return true
-    end
-    return false
-end
+function InventoryWrapper.place(itemName, autoSelect) return place(itemName, turtle.place, autoSelect) end
+function InventoryWrapper.placeDown(itemName, autoSelect) return place(itemName, turtle.placeDown, autoSelect) end
+function InventoryWrapper.placeUp(itemName, autoSelect) return place(itemName, turtle.placeUp, autoSelect) end
 
 function InventoryWrapper.updateAfterPlace()
     if inventory[selectedSlot] then
