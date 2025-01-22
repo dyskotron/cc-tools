@@ -46,6 +46,45 @@ function InventoryWrapper.getItemAt(slot)
     return inventory[slot]
 end
 
+-- Get the type of block contained within the specified slot
+-- If the slot contains a shulker box, return the type of block it contains
+function InventoryWrapper.getContentItemName(slot)
+    if slot < 1 or slot > 16 then
+        logger.warn("InventoryWrapper.getDetailedItemType() invalid slot number: " .. slot)
+        return nil
+    end
+
+    local item = InventoryWrapper.getItemAt(slot)
+    if not item then
+        logger.info("InventoryWrapper.getDetailedItemType() slot " .. slot .. " is empty")
+        return nil
+    end
+
+    if not item.name:find("shulker_box") then
+        return itemType
+    end
+
+    -- Handle shulker box specifically
+    if item.shulkerItem then
+        logger.info("InventoryWrapper.getDetailedItemType() shulker contains: " .. item.shulkerContent)
+        return item.shulkerItem
+    else
+        -- Attempt to initialize shulker data if not already done
+        logger.info("InventoryWrapper.getFinalItemName() shulker content not initialized, checking...")
+        if InventoryWrapper.initShulkerData(slot) then
+            --reload item
+            logger.info("InventoryWrapper.getFinalItemName() sucesfully initialized shulker content...")
+            item = InventoryWrapper.getItemAt(slot)
+            logger.info("InventoryWrapper.getFinalItemName() item data:" .. stringUtils.tableToString(item))
+            return item.shulkerItem
+        else
+            logger.warn("InventoryWrapper.getDetailedItemType() failed to determine shulker content")
+            return nil
+        end
+    end
+end
+
+
 function InventoryWrapper.printInventory()
     print("Inventory Contents:")
     for slot, item in pairs(inventory) do
@@ -157,6 +196,7 @@ function InventoryWrapper.placeAndProcessShulker(shulkerSlot, methods, metaData)
         end
     end
 
+    --todo: remove allMethodsSuceeded and just return false if any one of them fails
     local allMethodsSuceeded = true
 
     for _, method in ipairs(methods) do

@@ -1,11 +1,6 @@
 local logger = require("Modules.utils.logger")
+local inventoryWrapper = require("InventoryWrapper")
 local ColorMapper = {}
-
--- Get the name of the item in a specific turtle slot
-local function getItemName(slot)
-    local details = turtle.getItemDetail(slot)
-    return details and details.name or nil -- Use the full name internally
-end
 
 -- Map color indices to materials in the turtle's inventory
 function ColorMapper.mapColorsToMaterials(filename)
@@ -43,11 +38,13 @@ function ColorMapper.mapColorsToMaterials(filename)
 
     file.close()
 
+    inventoryWrapper.init()
+
     -- Map color IDs to materials
     local materialMapping = {}
     for colorID, color in pairs(usedColors) do
         if color.count > 0 then
-            local fullName = getItemName(color.slot)
+            local fullName = inventoryWrapper.getItemAt(color.slot).name
             if fullName then
                 materialMapping[colorID] = fullName
             else
