@@ -14,7 +14,7 @@ local function place(itemName, placeMethod, autoSelect)
         return true
     end
 
-    logger.warning("InventoryWrapper: Can't place block with name: " .. itemName)
+    logger.warn("InventoryWrapper: Can't place block with name: " .. itemName)
     return false
 end
 
@@ -91,7 +91,8 @@ end
 
 -- Select a slot containing the specified item, optionally loading from shulker boxes
 function InventoryWrapper.select(itemName, tryLoadFromShulker)
-    if inventory[selectedSlot].name == itemName and inventory[selectedSlot].count > 0 then
+    tryLoadFromShulker = tryLoadFromShulker ~= false
+    if inventory[selectedSlot] ~= nil and inventory[selectedSlot].name == itemName and inventory[selectedSlot].count > 0 then
         return true
     end
 
@@ -158,7 +159,6 @@ function InventoryWrapper.placeAndProcessShulker(shulkerSlot, methods, metaData)
 
     local allMethodsSuceeded = true
 
-    local continueProcessing = true -- Flag to track if processing should continue
     for _, method in ipairs(methods) do
         local success = method(shulkerSlot, metaData)
         if not success then
@@ -174,7 +174,9 @@ function InventoryWrapper.placeAndProcessShulker(shulkerSlot, methods, metaData)
 end
 
 function InventoryWrapper.checkForItem(shulkerSlot, targetItem)
-    logger.info("InventoryWrapper.checkForItem() checking shulker content:" .. InventoryWrapper.getShulkerItemName(shulkerSlot) .. "target Item is " .. targetItem)
+    local shulkerItemName = InventoryWrapper.getShulkerItemName(shulkerSlot);
+    local shulkerContent = shulkerItemName or "empty"
+    logger.info("InventoryWrapper.checkForItem() checking shulker content:" .. shulkerContent .. "target Item is " .. targetItem)
     return InventoryWrapper.getShulkerItemName(shulkerSlot) == targetItem
 end
 
@@ -182,14 +184,16 @@ function InventoryWrapper.suckUp(shulkerSlot)
 
     local itemSlot = InventoryWrapper.getEmptySlot(shulkerSlot)
     InventoryWrapper.selectSlot(itemSlot)
+
     -- Suck the items from the shulker box
     if turtle.suckUp() then
         InventoryWrapper.updateSlot(itemSlot)
+        return true
     else
         logger.info("cant suck from shulker")
     end
 
-    return true
+    return false
 end
 
 
@@ -218,9 +222,9 @@ function InventoryWrapper.initShulkerData(shulkerSlot)
     --local shulker = peripheral.wrap("top")
     local shulker = InventoryWrapper.wrapShulkerWithRetry(10,0.5)
     if not shulker then
-        logger.warning("Can't wrap placed shulker")
-        logger.warning("top device:" .. peripheral.getType("top"))
-        logger.warning("all devices(" .. #peripheral.getNames() .."): " .. stringUtils.tableToString(peripheral.getNames()))
+        logger.warn("Can't wrap placed shulker")
+        logger.warn("top device:" .. peripheral.getType("top"))
+        logger.warn("all devices(" .. #peripheral.getNames() .."): " .. stringUtils.tableToString(peripheral.getNames()))
         return false -- Failed to wrap the shulker box
     end
 

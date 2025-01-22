@@ -25,6 +25,11 @@ function stringUtils.urlDecode(str)
     end))
 end
 
+function stringUtils.getSimplifiedName(fullName)
+    local _, _, simpleName = string.find(fullName, ":(.+)")
+    return simpleName or fullName
+end
+
 function stringUtils.tableToString(t, indent)
     indent = indent or 0
     local indentString = string.rep(" ", indent)

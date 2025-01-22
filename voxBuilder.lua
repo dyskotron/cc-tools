@@ -129,7 +129,7 @@ local function buildStructure(datFile)
 end
 
 --local datFile = "vox_data/8x8x8.dat"
-local datFile = "vox_data/test_shape_33.dat"
+local datFile = "vox_data/Building04.dat"
 --local datFile = "vox_data/tst44.dat"
 
 logger.init(true, true, true, "/voxBuilder.log")
