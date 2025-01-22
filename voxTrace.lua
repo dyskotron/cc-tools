@@ -1,5 +1,6 @@
 local VoxTrace = {}
 
+local colorMapper = require("Modules.colorMapper")
 local logger = require("Modules.utils.logger")
 local term = term
 
@@ -81,7 +82,8 @@ local function logFinalMaterials(displayedColors)
 end
 
 function VoxTrace.parseAndShow(filename)
-    local file = fs.open(filename, "rb")
+
+--[[    local file = fs.open(filename, "rb")
     if not file then
         error("Failed to open .dat file: " .. filename)
     end
@@ -126,6 +128,11 @@ function VoxTrace.parseAndShow(filename)
             table.insert(displayedColors, { count = color.count, slot = color.slot, r = color.r, g = color.g, b = color.b })
         end
     end
+--]]
+
+    local result = colorMapper.mapColorsToMaterials(filename)
+
+    displayedColors = result.displayedColors
 
     -- Draw initial inventory mapping
     local lastY = redraw(displayedColors)
