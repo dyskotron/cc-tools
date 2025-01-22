@@ -1,6 +1,7 @@
 local VoxTrace = {}
 
 local colorMapper = require("Modules.colorMapper")
+local colorUtils = require("Modules.utils.colorUtils")
 local logger = require("Modules.utils.logger")
 local term = term
 
@@ -42,7 +43,7 @@ local function redraw(displayedColors)
         local itemName = getItemName(i) -- Get the name of the item in the corresponding turtle slot
 
         -- Draw color square
-        paintutils.drawFilledBox(1, y, 3, y, color.slot)
+        paintutils.drawFilledBox(1, y, 3, y, colorUtils.colorIdToTerminalId(color.slot))
 
         -- Reset background to black
         term.setBackgroundColor(colors.black)
@@ -83,53 +84,6 @@ end
 
 function VoxTrace.parseAndShow(filename)
 
---[[    local file = fs.open(filename, "rb")
-    if not file then
-        error("Failed to open .dat file: " .. filename)
-    end
-
-    -- Read dimensions and voxel count
-    local length = string.unpack("<I4", file.read(4))
-    local width = string.unpack("<I4", file.read(4))
-    local height = string.unpack("<I4", file.read(4))
-    local voxel_count = string.unpack("<I4", file.read(4))
-
-    logger.info("Model dimensions: Length=" .. length .. ", Width=" .. width .. ", Height=" .. height)
-    logger.info("Total voxels: " .. voxel_count)
-
-    -- Read color information
-    local color_count = string.unpack("<I4", file.read(4))
-    if not color_count or color_count > 16 then
-        error("Invalid color count: " .. tostring(color_count) .. " (must be 16 or fewer)")
-    end
-
-    logger.info("Number of colors: " .. color_count)
-
-    -- Initialize color table with counts
-    local usedColors = {}
-    for i = 1, color_count do
-        local index, r, g, b = string.unpack("<BBBB", file.read(4))
-        usedColors[index] = { r = r, g = g, b = b, count = 0, slot = 2 ^ (i - 1) }
-    end
-
-    -- Read voxel data and increment counts for each color
-    for _ = 1, voxel_count do
-        local x, y, z, color_index = string.unpack("<BBBB", file.read(4))
-        if usedColors[color_index] then
-            usedColors[color_index].count = usedColors[color_index].count + 1
-        end
-    end
-
-    -- Filter out unused colors
-    local displayedColors = {}
-    for index, color in pairs(usedColors) do
-        if color.count > 0 then
-            setPaletteColor(color.slot, color.r, color.g, color.b)
-            table.insert(displayedColors, { count = color.count, slot = color.slot, r = color.r, g = color.g, b = color.b })
-        end
-    end
---]]
-
     local result = colorMapper.mapColorsToMaterials(filename)
 
     displayedColors = result.displayedColors
@@ -158,28 +112,30 @@ function VoxTrace.parseAndShow(filename)
     term.setCursorPos(1, lastY + 2)
     print("Press any key to reset the palette and exit...")
     os.pullEvent("key") -- Wait for a key press
-
-    -- Reset palette to default
-    term.setPaletteColour(colors.white, 0xFFFFFF)
-    term.setPaletteColour(colors.black, 0x000000)
-    term.setPaletteColour(colors.orange, 0xFFA500)
-    term.setPaletteColour(colors.magenta, 0xFF00FF)
-    term.setPaletteColour(colors.lightBlue, 0xADD8E6)
-    term.setPaletteColour(colors.yellow, 0xFFFF00)
-    term.setPaletteColour(colors.lime, 0x00FF00)
-    term.setPaletteColour(colors.pink, 0xFFC0CB)
-    term.setPaletteColour(colors.gray, 0x808080)
-    term.setPaletteColour(colors.lightGray, 0xD3D3D3)
-    term.setPaletteColour(colors.cyan, 0x00FFFF)
-    term.setPaletteColour(colors.purple, 0x800080)
-    term.setPaletteColour(colors.blue, 0x0000FF)
-    term.setPaletteColour(colors.brown, 0xA52A2A)
-    term.setPaletteColour(colors.green, 0x008000)
-    term.setPaletteColour(colors.red, 0xFF0000)
 end
 
-local datFile = "vox_data/Building_only04.dat"
 logger.init(true, true, true, "/voxTrace.log")
+
+    logger.info("{} {} ", colors.white, 0xFFFFFF)
+    logger.info("{} {} ", colors.black, 0x000000)
+    logger.info("{} {} ", colors.orange, 0xFFA500)
+    logger.info("{} {} ", colors.magenta, 0xFF00FF)
+    logger.info("{} {} ", colors.lightBlue, 0xADD8E6)
+    logger.info("{} {} ", colors.yellow, 0xFFFF00)
+    logger.info("{} {} ", colors.lime, 0x00FF00)
+    logger.info("{} {} ", colors.pink, 0xFFC0CB)
+    logger.info("{} {} ", colors.gray, 0x808080)
+    logger.info("{} {} ", colors.lightGray, 0xD3D3D3)
+    logger.info("{} {} ", colors.cyan, 0x00FFFF)
+    logger.info("{} {} ", colors.purple, 0x800080)
+    logger.info("{} {} ", colors.blue, 0x0000FF)
+    logger.info("{} {} ", colors.brown, 0xA52A2A)
+    logger.info("{} {} ", colors.green, 0x008000)
+    logger.info("{} {} ", colors.red, 0xFF0000)
+
+
+local datFile = "vox_data/Building_only04.dat"
+
 logger.runWithLog(function() VoxTrace.parseAndShow(datFile) end)
 
 return VoxTrace

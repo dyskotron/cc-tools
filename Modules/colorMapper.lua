@@ -1,13 +1,7 @@
 local logger = require("Modules.utils.logger")
 local inventoryWrapper = require("Modules.InventoryWrapper")
+local colorUtils = require("Modules.utils.colorUtils")
 local ColorMapper = {}
-
---todo: move to color utils
-function ColorMapper.setPaletteColorRGB(colorSlot, r, g, b)
-    -- Convert RGB (0-255) to normalized RGB (0-1) and pack into a hex value
-    local hexColor = colors.packRGB(r / 255, g / 255, b / 255)
-    term.setPaletteColour(colorSlot, hexColor)
-end
 
 -- Map color indices to materials in the turtle's inventory
 function ColorMapper.mapColorsToMaterials(filename)
@@ -51,11 +45,15 @@ function ColorMapper.mapColorsToMaterials(filename)
 
     -- Filter out unused colors
     local displayedColors = {}
+    local i = 1
     for index, color in pairs(usedColors) do
         if color.count > 0 then
             --todo: move to whoever is calling this
-            ColorMapper.setPaletteColorRGB(color.slot, color.r, color.g, color.b)
+            color.slot = i
+            logger.info("color.slot: " .. color.slot)
+            colorUtils.setPaletteColorRGB(color.slot, color.r, color.g, color.b)
             table.insert(displayedColors, { count = color.count, slot = color.slot, r = color.r, g = color.g, b = color.b })
+            i = i + 1;
         end
     end
 
