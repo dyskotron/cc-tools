@@ -66,8 +66,8 @@ function InventoryWrapper.getContentItemName(slot)
 
     -- Handle shulker box specifically
     if item.shulkerContent then
-        logger.info("InventoryWrapper.getContentItemName() shulker contains: " .. item.shulkerContent)
-        return item.shulkerContent
+        logger.info("InventoryWrapper.getContentItemName() shulker contains: " .. next(item.shulkerContent))
+        return next(item.shulkerContent)
     else
         -- Attempt to initialize shulker data if not already done
         logger.info("InventoryWrapper.getContentItemName() shulker content not initialized, checking...")
@@ -76,7 +76,7 @@ function InventoryWrapper.getContentItemName(slot)
             logger.info("InventoryWrapper.getContentItemName() sucesfully initialized shulker content...")
             item = InventoryWrapper.getItemAt(slot)
             logger.info("InventoryWrapper.getFinalItemName() item data:" .. stringUtils.tableToString(item))
-            return item.shulkerContent
+            return next(item.shulkerContent) -- so we dont return table but the value of first item, this whole method needs to go anyways
         else
             logger.warn("InventoryWrapper.getContentItemName() failed to determine shulker content")
             return nil
@@ -106,6 +106,62 @@ function InventoryWrapper.getAnyBlockSlot()
         end
     end
     return nil -- Return nil if no slot with blc
+end
+
+-- Aggregate counts of all items across the entire inventory, including shulkers
+function InventoryWrapper.GetAllItemCounts()
+    logger.info("InventoryWrapper.GetAllItemCounts() aggregating item counts across inventory")
+
+    local itemCounts = {}
+
+    for slot, item in pairs(inventory) do
+        -- Initialize any uninitialized shulkers
+        if item.name:find("shulker_box") and not item.shulkerContent then
+            logger.info("Initializing shulker in slot " .. slot)
+            InventoryWrapper.initShulkerData(slot)
+        end
+
+        -- Count items directly in the inventory
+        if item.count and item.count > 0 then
+            itemCounts[item.name] = (itemCounts[item.name] or 0) + item.count
+        end
+
+        -- Count items inside shulkers
+        if item.shulkerContent then
+            for shulkerItem, count in pairs(item.shulkerContent) do
+                itemCounts[shulkerItem] = (itemCounts[shulkerItem] or 0) + count
+            end
+        end
+    end
+
+    return itemCounts -- Return a table of item names and their total counts
+end
+
+-- Get the total count of a specific item across the inventory, including shulkers
+function InventoryWrapper.GetTotalItemCount(targetItem)
+    logger.info("InventoryWrapper.GetTotalItemCount() calculating total count for item: " .. targetItem)
+
+    local totalCount = 0
+
+    for slot, item in pairs(inventory) do
+        -- Initialize any uninitialized shulkers
+        if item.name:find("shulker_box") and not item.shulkerContent then
+            logger.info("Initializing shulker in slot " .. slot)
+            InventoryWrapper.initShulkerData(slot)
+        end
+
+        -- Count items directly in the inventory
+        if item.name == targetItem and item.count and item.count > 0 then
+            totalCount = totalCount + item.count
+        end
+
+        -- Count items inside shulkers
+        if item.shulkerContent and item.shulkerContent[targetItem] then
+            totalCount = totalCount + item.shulkerContent[targetItem]
+        end
+    end
+
+    return totalCount -- Return the total count for the specified item
 end
 
 function InventoryWrapper.getShulkerContentName(slot)
@@ -212,17 +268,42 @@ function InventoryWrapper.checkForItem(shulkerSlot, targetItem)
     return InventoryWrapper.getShulkerContentName(shulkerSlot) == targetItem
 end
 
-function InventoryWrapper.suckUp(shulkerSlot)
+function InventoryWrapper.suckUp(shulkerSlot, targetItem)
+    logger.info("InventoryWrapper.suckUp() attempting to suck up items from shulker slot: " .. shulkerSlot)
 
     local itemSlot = InventoryWrapper.getEmptySlot(shulkerSlot)
+    if not itemSlot then
+        logger.error("No empty slot available to suck items from the shulker")
+        return false
+    end
+
     InventoryWrapper.selectSlot(itemSlot)
 
     -- Suck the items from the shulker box
     if turtle.suckUp() then
-        InventoryWrapper.updateSlot(itemSlot)
-        return true
+        local suckedItem = turtle.getItemDetail(itemSlot) -- Get details of the sucked item
+        if suckedItem then
+            local countSucked = suckedItem.count
+
+            -- Update the inventory slot
+            InventoryWrapper.updateSlot(itemSlot)
+
+            -- Update the shulker's content table
+            local shulkerData = inventory[shulkerSlot]
+            if shulkerData and shulkerData.shulkerContent and shulkerData.shulkerContent[suckedItem.name] then
+                shulkerData.shulkerContent[suckedItem.name] = shulkerData.shulkerContent[suckedItem.name] - countSucked
+
+                -- Remove the entry if the count reaches 0
+                if shulkerData.shulkerContent[suckedItem.name] <= 0 then
+                    shulkerData.shulkerContent[suckedItem.name] = nil
+                end
+            end
+
+            logger.info("Sucked " .. countSucked .. " of " .. suckedItem.name .. " from shulker")
+            return true
+        end
     else
-        logger.info("cant suck from shulker")
+        logger.warn("Failed to suck items from shulker")
     end
 
     return false
@@ -253,47 +334,29 @@ function InventoryWrapper.initShulkerData(shulkerSlot)
 end
 
 function InventoryWrapper.initPlacedShulkerData(shulkerSlot)
+    logger.info("InventoryWrapper.initPlacedShulkerData() about to wrap shulker and check contents")
 
-    logger.info("InventoryWrapper.initPlacedShulkerData() about to wrap shulker an check contents")
     -- Wrap the shulker box as a peripheral
-    --local shulker = peripheral.wrap("top")
-    local shulker = InventoryWrapper.wrapShulkerWithRetry(10,0.5)
+    local shulker = InventoryWrapper.wrapShulkerWithRetry(10, 0.5)
     if not shulker then
         logger.warn("Can't wrap placed shulker")
-        logger.warn("top device:" .. (peripheral.getType("top") or "none"))
-        logger.warn("all devices(" .. #peripheral.getNames() .."): " .. stringUtils.tableToString(peripheral.getNames()))
-        return false -- Failed to wrap the shulker box
+        return false
     end
 
-    -- Initialize fullStacks counter
-    local fullStacks = 0
-    local itemName = "empty"
-
-    -- Iterate through the contents of the shulker box
+    local shulkerContent = {} -- Table to store item counts
     local contents = shulker.list()
 
     for _, stack in pairs(contents) do
-        -- If there is any item in the stack, increment the fullStacks counter
         if stack.count > 0 then
-            fullStacks = fullStacks + 1
-            itemName = stack.name
+            shulkerContent[stack.name] = (shulkerContent[stack.name] or 0) + stack.count
         end
     end
 
-    -- Only update if there are full stacks in the shulker
-    if fullStacks > 0 then
-        -- Retrieve the current item from the inventory (preserve its original name and count)
-        local currentItem = inventory[shulkerSlot]
+    local currentItem = inventory[shulkerSlot]
+    currentItem.shulkerContent = shulkerContent -- Full table of item counts
+    inventory[shulkerSlot] = currentItem
 
-        -- Update the shulkerContent and shulkerStacks fields while leaving name and count intact
-        currentItem.shulkerContent = itemName -- Name from the first stack in the shulker
-        currentItem.shulkerStacks = fullStacks -- Number of full stacks
-
-        -- Update the inventory entry for the shulkerSlot
-        inventory[shulkerSlot] = currentItem
-    end
-
-    return true -- Successfully updated shulker data
+    return true
 end
 
 

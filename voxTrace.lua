@@ -1,5 +1,6 @@
 local VoxTrace = {}
 
+local inventoryWrapper = require("Modules.InventoryWrapper")
 local colorMapper = require("Modules.colorMapper")
 local colorUtils = require("Modules.utils.colorUtils")
 local mathUtils = require("Modules.utils.mathUtils")
@@ -37,11 +38,11 @@ local function redraw(displayedColors)
     return y, colorToMaterialMap
 end
 
--- Final grouped log of materials
 local function listFinalMaterials(displayedColors, colorToMaterialMap)
     term.clear()
     term.setCursorPos(1, 1)
-    print("Final Material Requirements:")
+
+    --print("Final Material Requirements:")
 
     local materialCounts = {}
     for colorId, color in ipairs(displayedColors) do
@@ -53,13 +54,49 @@ local function listFinalMaterials(displayedColors, colorToMaterialMap)
     end
 
     local y = 2 -- Start below the title
+    local missingMaterials = {} -- Store missing materials
+
     for itemName, totalCount in pairs(materialCounts) do
         local stacks = mathUtils.roundUp(totalCount, 64)
-        term.setCursorPos(1, y)
-        term.write(string.format("%d stack%s - %s", stacks, stacks > 1 and "s" or "", stringUtils.getSimplifiedName(itemName)))
-        y = y + 1
+        --todo: return back at some point this is just missing materials screen now
+        --term.setCursorPos(1, y)
+        --term.write(string.format("%d stack%s - %s", stacks, stacks > 1 and "s" or "", stringUtils.getSimplifiedName(itemName)))
+        --y = y + 1
+
+        -- Check total inventory for the item
+        local availableCount = inventoryWrapper.GetTotalItemCount(itemName)
+        if availableCount < totalCount then
+            -- Calculate the missing amount
+            local missingCount = totalCount - availableCount
+            missingMaterials[itemName] = missingCount
+        end
     end
+
+    -- Display missing materials below the list
+    if missingMaterials then
+        --y = y + 1
+        y = 1
+        term.setCursorPos(1, y)
+        print("Missing Materials:")
+        y = y + 1
+
+        for missingItem, missingCount in pairs(missingMaterials) do
+            logger.warn("missing material: {}  count needed {}", missingItem, missingCount)
+            term.setCursorPos(1, y)
+            term.setBackgroundColor(colors.red) -- Set red background
+            term.setTextColor(colors.white) -- Set white text color
+            term.clearLine() -- Clear the line with the red background
+            term.write(string.format("Missing %d of %s", missingCount, stringUtils.getSimplifiedName(missingItem)))
+            term.setBackgroundColor(colors.black) -- Reset to default background color
+            y = y + 1
+        end
+    end
+
+    -- Reset colors
+    term.setBackgroundColor(colors.black)
+    term.setTextColor(colors.white)
 end
+
 
 function VoxTrace.parseAndShow(filename)
 

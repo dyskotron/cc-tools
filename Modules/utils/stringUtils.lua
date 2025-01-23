@@ -1,3 +1,4 @@
+local logger = require("Modules.utils.logger")
 local stringUtils = {}
 
 function stringUtils.trim(s)
@@ -26,6 +27,12 @@ function stringUtils.urlDecode(str)
 end
 
 function stringUtils.getSimplifiedName(fullName)
+
+    --temp check
+    if type(fullName) == "table" then
+        logger.error(stringUtils.tableToString(fullName))
+    end
+
     local _, _, simpleName = string.find(fullName, ":(.+)")
     return simpleName or fullName
 end
