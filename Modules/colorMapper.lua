@@ -4,7 +4,7 @@ local colorUtils = require("Modules.utils.colorUtils")
 local ColorMapper = {}
 
 -- Map color indices to materials in the turtle's inventory
-function ColorMapper.mapColorsToMaterials(filename)
+function ColorMapper.getDisplayedColors(filename)
 
     local file = fs.open(filename, "rb")
     if not file then
@@ -58,7 +58,11 @@ function ColorMapper.mapColorsToMaterials(filename)
     end
 
     file.close()
---[[
+
+    return displayedColors
+end
+
+function ColorMapper.getColorToMaterialMap(usedColors)
     inventoryWrapper.init()
 
     -- Map color IDs to materials
@@ -74,8 +78,8 @@ function ColorMapper.mapColorsToMaterials(filename)
             end
         end
     end
---]]
-    return {materialMapping = materialMapping, displayedColors = displayedColors}
+
+    return materialMapping;
 end
 
 return ColorMapper

@@ -61,7 +61,7 @@ function InventoryWrapper.getContentItemName(slot)
     end
 
     if not item.name:find("shulker_box") then
-        return itemType
+        return item.name
     end
 
     -- Handle shulker box specifically
@@ -176,7 +176,7 @@ function InventoryWrapper.tryLoadFromShulker(itemName)
     for slot, item in pairs(inventory) do
         if item.name:find("shulker_box") and not item.shulkerItem then
             logger.info("InventoryWrapper.select() checking shulker box")
-            if InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.initShulkerData, InventoryWrapper.checkForItem, InventoryWrapper.suckUp}, itemName) then -- need to add the extra param here
+            if InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.initPlacedShulkerData, InventoryWrapper.checkForItem, InventoryWrapper.suckUp}, itemName) then -- need to add the extra param here
                 return true
             end
         end
@@ -187,30 +187,32 @@ end
 
 function InventoryWrapper.placeAndProcessShulker(shulkerSlot, methods, metaData)
 
+    logger.info("InventoryWrapper.placeAndProcessShulker")
     InventoryWrapper.selectSlot(shulkerSlot)
 
     if not turtle.detectUp() or turtle.digUp() then
         if not turtle.placeUp() then
-            print("Unable to place shulker box")
+            logger.info("Unable to place shulker box")
             return false
         end
     end
 
-    --todo: remove allMethodsSuceeded and just return false if any one of them fails
-    local allMethodsSuceeded = true
+    logger.info("shulker placed")
+
+    local success = true
 
     for _, method in ipairs(methods) do
         local success = method(shulkerSlot, metaData)
         if not success then
-            print("Method failed, skipping further methods.")
-            allMethodsSuceeded = false
+            logger.info("Method failed, skipping further methods.")
+            success = false
             break
         end
     end
 
     InventoryWrapper.selectSlot(shulkerSlot)
     turtle.digUp()
-    return allMethodsSuceeded
+    return success
 end
 
 function InventoryWrapper.checkForItem(shulkerSlot, targetItem)
@@ -256,14 +258,19 @@ function InventoryWrapper.wrapShulkerWithRetry(maxRetries, delay)
 end
 
 function InventoryWrapper.initShulkerData(shulkerSlot)
+    logger.info("InventoryWrapper.initShulkerData({})", shulkerSlot)
+    return InventoryWrapper.placeAndProcessShulker(shulkerSlot, {InventoryWrapper.initPlacedShulkerData})
+end
 
-    logger.info("InventoryWrapper.initShulkerData() found item in shulker - updating inventory data")
+function InventoryWrapper.initPlacedShulkerData(shulkerSlot)
+
+    logger.info("InventoryWrapper.initPlacedShulkerData() about to wrap shulker an check contents")
     -- Wrap the shulker box as a peripheral
     --local shulker = peripheral.wrap("top")
     local shulker = InventoryWrapper.wrapShulkerWithRetry(10,0.5)
     if not shulker then
         logger.warn("Can't wrap placed shulker")
-        logger.warn("top device:" .. peripheral.getType("top"))
+        logger.warn("top device:" .. (peripheral.getType("top") or "none"))
         logger.warn("all devices(" .. #peripheral.getNames() .."): " .. stringUtils.tableToString(peripheral.getNames()))
         return false -- Failed to wrap the shulker box
     end

@@ -111,7 +111,7 @@ local function buildStructure(datFile)
     local model = parseDatFile(datFile)
 
     -- Map colors to materials using ColorMapper
-    local colorMapping, _ = ColorMapper.mapColorsToMaterials(datFile)
+    local colorMapping, _ = ColorMapper.getDisplayedColors(datFile)
 
     inventoryWrapper.init()
     logger.info("Inventory wrapper initialized.")
