@@ -1,4 +1,4 @@
-local VoxTrace = {}
+local VoxChecker = {}
 
 local inventoryWrapper = require("Modules.InventoryWrapper")
 local colorMapper = require("Modules.colorMapper")
@@ -14,13 +14,17 @@ local function redraw(displayedColors)
     print("Required Colors and Items:")
 
     local colorToMaterialMap = colorMapper.getColorToMaterialMap(displayedColors)
+    logger.info("colorToMaterialMap \n" .. stringUtils.tableToString(colorToMaterialMap))
+    logger.info("displayedColors \n" .. stringUtils.tableToString(displayedColors))
 
     local y = 2 -- Start drawing after the title
 
-    for colorId, color in ipairs(displayedColors) do
+    for colorId, color in pairs(displayedColors) do
+        logger.info("looping trough displayedColors: id{} color{}", colorId, color)
         local count = color.count
         local stacks = mathUtils.roundUp(count, 64)
         local itemName = colorToMaterialMap[colorId] -- Get the name of the item in the corresponding turtle slot
+        logger.info("colorID: {}  colorToMaterialMap[colorId]: {}", colorId, stringUtils.tableToString(colorToMaterialMap))
 
         -- Draw color square
         paintutils.drawFilledBox(1, y, 3, y, colorUtils.colorIdToTerminalId(color.slot))
@@ -42,10 +46,8 @@ local function listMissingMaterials(displayedColors, colorToMaterialMap)
     term.clear()
     term.setCursorPos(1, 1)
 
-    print("Missing Materials:")
-
     local materialCounts = {}
-    for colorId, color in ipairs(displayedColors) do
+    for colorId, color in pairs(displayedColors) do
         local itemName = colorToMaterialMap[colorId]
         if not materialCounts[itemName] then
             materialCounts[itemName] = 0
@@ -53,7 +55,6 @@ local function listMissingMaterials(displayedColors, colorToMaterialMap)
         materialCounts[itemName] = materialCounts[itemName] + color.count
     end
 
-    local y = 2 -- Start below the title
     local missingMaterials = {} -- Store missing materials
 
     for itemName, totalCount in pairs(materialCounts) do
@@ -68,32 +69,51 @@ local function listMissingMaterials(displayedColors, colorToMaterialMap)
     end
 
     -- Display missing materials below the list
-    if missingMaterials then
-        --y = y + 1
-        y = 1
-        term.setCursorPos(1, y)
-        print("Missing Materials:")
-        y = y + 1
+   if next(missingMaterials) then
+       -- Display missing materials
+       y = 1
+       term.setCursorPos(1, y)
+       print("Missing Materials:")
+       y = y + 1
 
-        for missingItem, missingCount in pairs(missingMaterials) do
-            logger.warn("missing material: {}  count needed {}", missingItem, missingCount)
-            term.setCursorPos(1, y)
-            term.setBackgroundColor(colors.red) -- Set red background
-            term.setTextColor(colors.white) -- Set white text color
-            term.clearLine() -- Clear the line with the red background
-            term.write(string.format("Missing %d of %s", missingCount, stringUtils.getSimplifiedName(missingItem)))
-            term.setBackgroundColor(colors.black) -- Reset to default background color
-            y = y + 1
-        end
-    end
+       local allMaterialsOk = false
+
+       for missingItem, missingCount in pairs(missingMaterials) do
+           logger.warn("missing material: {}  count needed {}", missingItem, missingCount)
+           term.setCursorPos(1, y)
+           term.setBackgroundColor(colors.red) -- Set red background
+           term.setTextColor(colors.white) -- Set white text color
+           term.clearLine() -- Clear the line with the red background
+           term.write(string.format("Missing %d of %s", missingCount, stringUtils.getSimplifiedName(missingItem)))
+           term.setBackgroundColor(colors.black) -- Reset to default background color
+           y = y + 1
+       end
+   else
+       -- Display success message
+       allMaterialsOk = true
+       y = 1
+       term.setCursorPos(1, y)
+       term.setBackgroundColor(colors.green) -- Set green background
+       term.setTextColor(colors.black) -- Set black text color
+       term.clearLine() -- Clear the line with the green background
+       term.write("You have all needed materials.")
+       y = y + 1
+       term.setCursorPos(1, y)
+       term.clearLine() -- Clear the line with the green background
+       term.write("We're good to go!")
+       term.setBackgroundColor(colors.black) -- Reset to default background color
+       term.setTextColor(colors.white) -- Reset to default text color
+   end
 
     -- Reset colors
     term.setBackgroundColor(colors.black)
     term.setTextColor(colors.white)
+
+    return y, allMaterialsOk
 end
 
 
-function VoxTrace.parseAndShow(filename)
+function VoxChecker.parseAndShow(filename)
 
     local displayedColors = colorMapper.getDisplayedColors(filename)
     local colorToMaterialMap
@@ -104,6 +124,7 @@ function VoxTrace.parseAndShow(filename)
         colorToMaterialMap = map
 
         -- Wait for user input
+        term.setCursorPos(1, lastY + 2)
         print("Press R to refresh, Enter to finalize...")
         local event, key = os.pullEvent("key")
         if not (key == keys.r) then
@@ -111,18 +132,27 @@ function VoxTrace.parseAndShow(filename)
         end
     end
 
-    while true do
+    colorUtils.resetTerminalPalette()
+
+    local needsRefresh = true
+    while needsRefresh do
         -- Draw initial missing materials
-        listMissingMaterials(displayedColors, colorToMaterialMap)
+        local lastY, allMaterialsOk = listMissingMaterials(displayedColors, colorToMaterialMap)
 
         -- Wait for user input
-        print("Press R to refresh, Enter to finalize...")
-        local event, key = os.pullEvent("key")
-        if not (key == keys.r) then
-            break
+        term.setCursorPos(1, lastY + 2)
+        if(allMaterialsOk) then
+            print("Press Any key to quit...")
+            local event, key = os.pullEvent("key")
+            needsRefresh = false
+        else
+            print("Press R to refresh, Enter to finalize...")
+            local event, key = os.pullEvent("key")
+            if not (key == keys.r) then
+                break
+            end
+            inventoryWrapper.init()
         end
-
-        inventoryWrapper.init()
     end
 
     term.clear()
@@ -130,6 +160,6 @@ end
 
 local datFile = "vox_data/Building_only04.dat"
 logger.init(false, true, true, "/voxTrace.log")
-logger.runWithLog(function() VoxTrace.parseAndShow(datFile) end)
+logger.runWithLog(function() VoxChecker.parseAndShow(datFile) end)
 
-return VoxTrace
+return VoxChecker

@@ -267,7 +267,7 @@ end
 function InventoryWrapper.checkForItem(shulkerSlot, targetItem)
     local shulkerContentName = InventoryWrapper.getShulkerContentName(shulkerSlot);
     local shulkerContent = shulkerContentName or "empty"
-    logger.info("InventoryWrapper.checkForItem() checking shulker content:" .. shulkerContent .. "target Item is " .. targetItem)
+    logger.info("InventoryWrapper.checkForItem() checking shulker content:" .. stringUtils.tableToString(shulkerContent) .. "target Item is " .. targetItem)
     return InventoryWrapper.getShulkerContentName(shulkerSlot) == targetItem
 end
 

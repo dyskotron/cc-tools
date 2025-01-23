@@ -1,7 +1,8 @@
 local inventoryWrapper = require("Modules.InventoryWrapper")
-local logger = require("Modules.utils.logger")
 local traverseHelper = require("Modules.traverseHelper")
 local ColorMapper = require("Modules.colorMapper")
+local logger = require("Modules.utils.logger")
+local stringUtils = require("Modules.utils.stringUtils")
 
 local function parseDatFile(filename)
     local file = fs.open(filename, "rb")
@@ -85,8 +86,9 @@ local function buildPlane(planes, z, colorMapping)
         -- Get material for the voxel's color
         local material = colorMapping[color]
         if not material then
-            logger.warn("No material mapped for color ID=" .. color)
-            material = "minecraft:stone" -- Fallback material
+            logger.error("No material mapped for color ID=" .. color)
+            logger.error(color .. " ------- ".. stringUtils.tableToString(colorMapping))
+            return
         end
 
         -- Move directly to the voxel's position
@@ -111,10 +113,10 @@ local function buildStructure(datFile)
     local model = parseDatFile(datFile)
 
     -- Map colors to materials using ColorMapper
-    local colorMapping, _ = ColorMapper.getDisplayedColors(datFile)
+    local displayedColors = ColorMapper.getDisplayedColors(datFile)
+    local colorMapping = ColorMapper.getColorToMaterialMap(displayedColors)
 
-    inventoryWrapper.init()
-    logger.info("Inventory wrapper initialized.")
+    -- inventoryWrapper.init() WHY EXACTLY ???
 
     -- Start at a safe position
     traverseHelper.moveUpDestructive()
@@ -124,7 +126,9 @@ local function buildStructure(datFile)
     for z = 1, model.height do
         logger.info("Moving to plane Z=" .. z)
         traverseHelper.traverseZ(z) -- Move to the Z position of the plane
-        buildPlane(model.planes, z, colorMapping) -- Pass the color-to-material mapping
+        if not buildPlane(model.planes, z, colorMapping) then -- Pass the color-to-material mapping
+            return
+        end
     end
 
     logger.info("Build completed for file: " .. datFile)

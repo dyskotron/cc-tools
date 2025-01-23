@@ -52,7 +52,7 @@ function ColorMapper.getDisplayedColors(filename)
             color.slot = i
             logger.info("color.slot: " .. color.slot)
             colorUtils.setPaletteColorRGB(color.slot, color.r, color.g, color.b)
-            table.insert(displayedColors, { count = color.count, slot = color.slot, r = color.r, g = color.g, b = color.b })
+            displayedColors[index] =  { count = color.count, slot = color.slot, r = color.r, g = color.g, b = color.b }
             i = i + 1;
         end
     end

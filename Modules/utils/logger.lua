@@ -111,7 +111,7 @@ function logger.runWithLog(func)
     logger.info("Executing function")
     local success, err = pcall(func)
     if not success then
-        logger.error("Error while executing function: {}", err)
+        logger.error("Error while executing function: {}", tostring(err))
     else
         logger.info("Execution completed successfully.")
     end
