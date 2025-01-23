@@ -117,7 +117,6 @@ function InventoryWrapper.GetAllItemCounts()
     for slot, item in pairs(inventory) do
         -- Initialize any uninitialized shulkers
         if item.name:find("shulker_box") and not item.shulkerContent then
-            logger.info("Initializing shulker in slot " .. slot)
             InventoryWrapper.initShulkerData(slot)
         end
 
@@ -143,13 +142,9 @@ function InventoryWrapper.GetTotalItemCount(targetItem)
 
     local totalCount = 0
 
-    for slot, item in pairs(inventory) do
-        -- Initialize any uninitialized shulkers
-        if item.name:find("shulker_box") and not item.shulkerContent then
-            logger.info("Initializing shulker in slot " .. slot)
-            InventoryWrapper.initShulkerData(slot)
-        end
+    InventoryWrapper.InitAllUnknownShulkers()
 
+    for slot, item in pairs(inventory) do
         -- Count items directly in the inventory
         if item.name == targetItem and item.count and item.count > 0 then
             totalCount = totalCount + item.count
@@ -162,6 +157,14 @@ function InventoryWrapper.GetTotalItemCount(targetItem)
     end
 
     return totalCount -- Return the total count for the specified item
+end
+
+function InventoryWrapper.InitAllUnknownShulkers()
+    for slot, item in pairs(inventory) do
+        if item.name:find("shulker_box") and not item.shulkerContent then
+            InventoryWrapper.initShulkerData(slot)
+        end
+    end
 end
 
 function InventoryWrapper.getShulkerContentName(slot)
@@ -329,7 +332,7 @@ function InventoryWrapper.wrapShulkerWithRetry(maxRetries, delay)
 end
 
 function InventoryWrapper.initShulkerData(shulkerSlot)
-    logger.info("InventoryWrapper.initShulkerData({})", shulkerSlot)
+    logger.info("Initializing shulker in slot " .. shulkerSlot)
     return InventoryWrapper.placeAndProcessShulker(shulkerSlot, {InventoryWrapper.initPlacedShulkerData})
 end
 

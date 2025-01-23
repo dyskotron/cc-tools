@@ -38,11 +38,11 @@ local function redraw(displayedColors)
     return y, colorToMaterialMap
 end
 
-local function listFinalMaterials(displayedColors, colorToMaterialMap)
+local function listMissingMaterials(displayedColors, colorToMaterialMap)
     term.clear()
     term.setCursorPos(1, 1)
 
-    --print("Final Material Requirements:")
+    print("Missing Materials:")
 
     local materialCounts = {}
     for colorId, color in ipairs(displayedColors) do
@@ -57,18 +57,13 @@ local function listFinalMaterials(displayedColors, colorToMaterialMap)
     local missingMaterials = {} -- Store missing materials
 
     for itemName, totalCount in pairs(materialCounts) do
-        local stacks = mathUtils.roundUp(totalCount, 64)
-        --todo: return back at some point this is just missing materials screen now
-        --term.setCursorPos(1, y)
-        --term.write(string.format("%d stack%s - %s", stacks, stacks > 1 and "s" or "", stringUtils.getSimplifiedName(itemName)))
-        --y = y + 1
-
         -- Check total inventory for the item
         local availableCount = inventoryWrapper.GetTotalItemCount(itemName)
         if availableCount < totalCount then
             -- Calculate the missing amount
             local missingCount = totalCount - availableCount
-            missingMaterials[itemName] = missingCount
+            local missingStacks = mathUtils.roundUp(missingCount, 64)
+            missingMaterials[itemName] = missingStacks
         end
     end
 
@@ -101,31 +96,36 @@ end
 function VoxTrace.parseAndShow(filename)
 
     local displayedColors = colorMapper.getDisplayedColors(filename)
-
-    -- Draw initial inventory mapping
-    local lastY, colorToMaterialMap = redraw(displayedColors)
+    local colorToMaterialMap
 
     while true do
-        -- Wait for user input
-        term.setCursorPos(1, lastY + 2)
-        print("Press R to refresh, Enter to finalize...")
 
+        local lastY, map = redraw(displayedColors)
+        colorToMaterialMap = map
+
+        -- Wait for user input
+        print("Press R to refresh, Enter to finalize...")
         local event, key = os.pullEvent("key")
-        if key == keys.r then
-            -- Redraw inventory mapping
-            lastY, colorToMaterialMap = redraw(displayedColors)
-        elseif key == keys.enter then
-            break -- Finalize and log the results
+        if not (key == keys.r) then
+            break
         end
     end
 
-    -- Log final materials
-    listFinalMaterials(displayedColors, colorToMaterialMap)
+    while true do
+        -- Draw initial missing materials
+        listMissingMaterials(displayedColors, colorToMaterialMap)
 
-    -- Wait for user input before resetting the palette
-    term.setCursorPos(1, lastY + 2)
-    print("Press any key to reset the palette and exit...")
-    os.pullEvent("key") -- Wait for a key press
+        -- Wait for user input
+        print("Press R to refresh, Enter to finalize...")
+        local event, key = os.pullEvent("key")
+        if not (key == keys.r) then
+            break
+        end
+
+        inventoryWrapper.init()
+    end
+
+    term.clear()
 end
 
 local datFile = "vox_data/Building_only04.dat"
