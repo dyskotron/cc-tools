@@ -54,9 +54,9 @@ local function listFinalMaterials(displayedColors, colorToMaterialMap)
 
     local y = 2 -- Start below the title
     for itemName, totalCount in pairs(materialCounts) do
-        local stacks = roundUp(totalCount, 64)
+        local stacks = mathUtils.roundUp(totalCount, 64)
         term.setCursorPos(1, y)
-        term.write(string.format("%d stack%s - %s", stacks, stacks > 1 and "s" or "", itemName))
+        term.write(string.format("%d stack%s - %s", stacks, stacks > 1 and "s" or "", stringUtils.getSimplifiedName(itemName)))
         y = y + 1
     end
 end

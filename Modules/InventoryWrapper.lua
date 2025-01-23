@@ -28,7 +28,7 @@ function InventoryWrapper.init()
             inventory[slot] = {
                 name = details.name,
                 count = details.count,
-                shulkerItem = nil, -- Item type inside the shulker box (if applicable)
+                shulkerContent = nil, -- Item type inside the shulker box (if applicable)
                 shulkerStacks = 0, -- Number of full stacks inside the shulker box
             }
         else
@@ -65,9 +65,9 @@ function InventoryWrapper.getContentItemName(slot)
     end
 
     -- Handle shulker box specifically
-    if item.shulkerItem then
+    if item.shulkerContent then
         logger.info("InventoryWrapper.getContentItemName() shulker contains: " .. item.shulkerContent)
-        return item.shulkerItem
+        return item.shulkerContent
     else
         -- Attempt to initialize shulker data if not already done
         logger.info("InventoryWrapper.getContentItemName() shulker content not initialized, checking...")
@@ -76,20 +76,10 @@ function InventoryWrapper.getContentItemName(slot)
             logger.info("InventoryWrapper.getContentItemName() sucesfully initialized shulker content...")
             item = InventoryWrapper.getItemAt(slot)
             logger.info("InventoryWrapper.getFinalItemName() item data:" .. stringUtils.tableToString(item))
-            return item.shulkerItem
+            return item.shulkerContent
         else
             logger.warn("InventoryWrapper.getContentItemName() failed to determine shulker content")
             return nil
-        end
-    end
-end
-
-
-function InventoryWrapper.printInventory()
-    print("Inventory Contents:")
-    for slot, item in pairs(inventory) do
-        if item then
-            print(item.name .. "(" .. item.count .. ")")
         end
     end
 end
@@ -118,11 +108,11 @@ function InventoryWrapper.getAnyBlockSlot()
     return nil -- Return nil if no slot with blc
 end
 
-function InventoryWrapper.getShulkerItemName(slot)
+function InventoryWrapper.getShulkerContentName(slot)
     -- Check if the slot exists in the inventory and contains a shulker
     local item = inventory[slot]
-    if item and item.shulkerItem then
-        return item.shulkerItem -- Return the name of the item inside the shulker
+    if item and item.shulkerContent then
+        return item.shulkerContent -- Return the name of the item inside the shulker
     else
         return nil -- No shulker item in the slot
     end
@@ -165,7 +155,7 @@ end
 function InventoryWrapper.tryLoadFromShulker(itemName)
     -- First, check confirmed shulkers
     for slot, item in pairs(inventory) do
-        if item.name:find("shulker_box") and item.shulkerItem == itemName and item.shulkerStacks > 0 then
+        if item.name:find("shulker_box") and item.shulkerContent == itemName and item.shulkerStacks > 0 then
             -- Shulker confirmed, place it, suck the item, and dig it back
             logger.info("InventoryWrapper.select() found item " .. itemName .. " in shulker box")
             return InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.suckUp})
@@ -174,7 +164,7 @@ function InventoryWrapper.tryLoadFromShulker(itemName)
 
     -- If item not found, lazily check unconfirmed shulkers
     for slot, item in pairs(inventory) do
-        if item.name:find("shulker_box") and not item.shulkerItem then
+        if item.name:find("shulker_box") and not item.shulkerContent then
             logger.info("InventoryWrapper.select() checking shulker box")
             if InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.initPlacedShulkerData, InventoryWrapper.checkForItem, InventoryWrapper.suckUp}, itemName) then -- need to add the extra param here
                 return true
@@ -216,10 +206,10 @@ function InventoryWrapper.placeAndProcessShulker(shulkerSlot, methods, metaData)
 end
 
 function InventoryWrapper.checkForItem(shulkerSlot, targetItem)
-    local shulkerItemName = InventoryWrapper.getShulkerItemName(shulkerSlot);
-    local shulkerContent = shulkerItemName or "empty"
+    local shulkerContentName = InventoryWrapper.getShulkerContentName(shulkerSlot);
+    local shulkerContent = shulkerContentName or "empty"
     logger.info("InventoryWrapper.checkForItem() checking shulker content:" .. shulkerContent .. "target Item is " .. targetItem)
-    return InventoryWrapper.getShulkerItemName(shulkerSlot) == targetItem
+    return InventoryWrapper.getShulkerContentName(shulkerSlot) == targetItem
 end
 
 function InventoryWrapper.suckUp(shulkerSlot)
@@ -295,8 +285,8 @@ function InventoryWrapper.initPlacedShulkerData(shulkerSlot)
         -- Retrieve the current item from the inventory (preserve its original name and count)
         local currentItem = inventory[shulkerSlot]
 
-        -- Update the shulkerItem and shulkerStacks fields while leaving name and count intact
-        currentItem.shulkerItem = itemName -- Name from the first stack in the shulker
+        -- Update the shulkerContent and shulkerStacks fields while leaving name and count intact
+        currentItem.shulkerContent = itemName -- Name from the first stack in the shulker
         currentItem.shulkerStacks = fullStacks -- Number of full stacks
 
         -- Update the inventory entry for the shulkerSlot
@@ -342,7 +332,7 @@ function InventoryWrapper.updateSlot(slot)
             inventory[slot] = {
                 name = details.name,
                 count = details.count,
-                shulkerItem = nil,
+                shulkerContent = nil,
                 shulkerStacks = 0,
             }
         end
@@ -368,7 +358,7 @@ function InventoryWrapper.accessShulker()
             end
 
             -- Update the shulker box's contents
-            inventory[selectedSlot].shulkerItem = itemType
+            inventory[selectedSlot].shulkerContent = itemType
             inventory[selectedSlot].shulkerStacks = stacks
 
             -- Dig the shulker box back up
