@@ -37,18 +37,18 @@ function stringUtils.getSimplifiedName(fullName)
     return simpleName or fullName
 end
 
-function stringUtils.tableOrString(value)
+function stringUtils.tableToString(value)
 
     if type(value) == "table" then
         -- Simply call `tableToString` for tables
-        return stringUtils.tableToString(value, 1)
+        return stringUtils.tableToString_internal(value, 1)
     else
         -- Handle non-table values
-        return tostring(value)
+        return "[ERRRROOOOOORRRR] Expected table but got this:" .. tostring(value)
     end
 end
 
-function stringUtils.tableToString(t, indent)
+function stringUtils.tableToString_internal(t, indent)
     indent = indent or 0
     local indentString = string.rep(" ", indent)
     local result = ""

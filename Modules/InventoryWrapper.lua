@@ -75,7 +75,7 @@ function InventoryWrapper.getContentItemName(slot)
             logger.info("InventoryWrapper.getContentItemName() sucesfully initialized shulker content...")
             item = InventoryWrapper.getItemAt(slot)
             local shulkerName = next(item.shulkerContent);
-            logger.info("InventoryWrapper.getContentItemName() item data:" .. stringUtils.tableOrString(item))
+            logger.info("InventoryWrapper.getContentItemName() item data:" .. stringUtils.tableToString(item))
             return shulkerName -- so we dont return table but the value of first item, this whole method needs to go anyways
         else
             logger.warn("InventoryWrapper.getContentItemName() failed to determine shulker content")
@@ -171,7 +171,7 @@ function InventoryWrapper.getShulkerContentName(slot)
     -- Check if the slot exists in the inventory and contains a shulker
     local item = inventory[slot]
     if item and item.shulkerContent then
-        return item.shulkerContent -- Return the name of the item inside the shulker
+        return next(item.shulkerContent) -- Return the name of the item inside the shulker
     else
         return nil -- No shulker item in the slot
     end

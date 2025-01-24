@@ -76,7 +76,7 @@ local function buildPlane(planes, z, colorMapping)
     local plane = planes[z]
     if not plane then
         logger.warn("No plane at Z=" .. z)
-        return
+        return false
     end
 
     for _, voxel in pairs(plane) do
@@ -91,7 +91,7 @@ local function buildPlane(planes, z, colorMapping)
             logger.error("No material mapped for color ID=" .. color)
             --logger.error(color .. " -------plane:\n ".. stringUtils.tableToString(plane))
             logger.error(color .. " -------\n ".. stringUtils.tableToString(colorMapping))
-            return
+            return false
         end
 
         -- Move directly to the voxel's position
@@ -106,6 +106,8 @@ local function buildPlane(planes, z, colorMapping)
             logger.warn("Failed to place " .. material .. " at X=" .. x .. ", Y=" .. y .. ", Z=" .. z)
         end
     end
+
+    return true
 end
 
 -- Build the structure plane by plane
@@ -119,7 +121,7 @@ local function buildStructure(datFile)
     local displayedColors = ColorMapper.getDisplayedColors(datFile)
     local colorMapping = ColorMapper.getColorToMaterialMap(displayedColors)
 
-    logger.info("colorMapping: {}", stringUtils.tableOrString(colorMapping))
+    logger.info("colorMapping: {}", stringUtils.tableToString(colorMapping))
 
     -- inventoryWrapper.init() WHY EXACTLY ???
 
@@ -127,11 +129,14 @@ local function buildStructure(datFile)
     traverseHelper.moveUpDestructive()
     traverseHelper.moveForwardDestructive()
 
+    logger.info("building model with height {} numPlanes: {}", model.height, #model.planes)
+
     -- Build plane by plane
     for z = 1, model.height do
         logger.info("Moving to plane Z=" .. z)
         traverseHelper.traverseZ(z) -- Move to the Z position of the plane
         if not buildPlane(model.planes, z, colorMapping) then -- Pass the color-to-material mapping
+            logger.error("buildPlane returned false quitting the build")
             return
         end
     end
