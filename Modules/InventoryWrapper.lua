@@ -28,8 +28,7 @@ function InventoryWrapper.init()
             inventory[slot] = {
                 name = details.name,
                 count = details.count,
-                shulkerContent = nil, -- Item type inside the shulker box (if applicable)
-                shulkerStacks = 0, -- Number of full stacks inside the shulker box
+                shulkerContent = nil,
             }
         else
             inventory[slot] = nil
@@ -75,8 +74,9 @@ function InventoryWrapper.getContentItemName(slot)
             --reload item
             logger.info("InventoryWrapper.getContentItemName() sucesfully initialized shulker content...")
             item = InventoryWrapper.getItemAt(slot)
-            logger.info("InventoryWrapper.getFinalItemName() item data:" .. stringUtils.tableToString(item))
-            return next(item.shulkerContent) -- so we dont return table but the value of first item, this whole method needs to go anyways
+            local shulkerName = next(item.shulkerContent);
+            logger.info("InventoryWrapper.getContentItemName() item data:" .. stringUtils.tableOrString(item))
+            return shulkerName -- so we dont return table but the value of first item, this whole method needs to go anyways
         else
             logger.warn("InventoryWrapper.getContentItemName() failed to determine shulker content")
             return nil
@@ -206,18 +206,31 @@ function InventoryWrapper.select(itemName, tryLoadFromShulker)
         end
     end
 
+    logger.warn("InventoryWrapper.select() cant find " .. itemName .. " in inventory or shulkers")
     -- Item not found in inventory or shulker boxes
     return false
+end
+
+
+-- Utility method to get the count of a specific item from the shulker's content table
+function InventoryWrapper.getItemCountFromShulker(shulkerContent, itemName)
+    if not shulkerContent or type(shulkerContent) ~= "table" then
+        return 0
+    end
+    return shulkerContent[itemName] or 0
 end
 
 -- Load items of a specific type from a shulker box
 function InventoryWrapper.tryLoadFromShulker(itemName)
     -- First, check confirmed shulkers
     for slot, item in pairs(inventory) do
-        if item.name:find("shulker_box") and item.shulkerContent == itemName and item.shulkerStacks > 0 then
-            -- Shulker confirmed, place it, suck the item, and dig it back
-            logger.info("InventoryWrapper.select() found item " .. itemName .. " in shulker box")
-            return InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.suckUp})
+        if item.name:find("shulker_box") and item.shulkerContent then
+            local itemCount = InventoryWrapper.getItemCountFromShulker(item.shulkerContent, itemName)
+            if itemCount > 0 then
+                -- Shulker confirmed, place it, suck the item, and dig it back
+                logger.info("InventoryWrapper.tryLoadFromShulker() found item " .. itemName .. " in shulker box")
+                return InventoryWrapper.placeAndProcessShulker(slot, {InventoryWrapper.suckUp})
+            end
         end
     end
 
@@ -337,28 +350,40 @@ function InventoryWrapper.initShulkerData(shulkerSlot)
 end
 
 function InventoryWrapper.initPlacedShulkerData(shulkerSlot)
-    logger.info("InventoryWrapper.initPlacedShulkerData() about to wrap shulker and check contents")
+    --logger.info("InventoryWrapper.initPlacedShulkerData() about to wrap shulker and check contents")
 
     -- Wrap the shulker box as a peripheral
     local shulker = InventoryWrapper.wrapShulkerWithRetry(10, 0.5)
     if not shulker then
-        logger.warn("Can't wrap placed shulker")
+        --logger.warn("InventoryWrapper.initPlacedShulkerData() Can't wrap placed shulker")
         return false
     end
 
     local shulkerContent = {} -- Table to store item counts
     local contents = shulker.list()
 
-    for _, stack in pairs(contents) do
-        if stack.count > 0 then
+    -- Log the raw contents for debugging
+    --logger.info("InventoryWrapper.initPlacedShulkerData() shulker {} raw contents: {}", peripheral.getName(shulker), stringUtils.tableToString(contents))
+
+    for key, stack in pairs(contents) do
+        --logger.info("Iterating stack at key {}: {}", key, stringUtils.tableToString(stack))
+
+        -- Validate and process each stack
+        if stack and stack.name and stack.count and stack.count > 0 then
             shulkerContent[stack.name] = (shulkerContent[stack.name] or 0) + stack.count
+            --logger.info("Added to shulkerContent: {} count={} total={}", stack.name, stack.count, shulkerContent[stack.name])
+        else
+            --logger.warn("Invalid or empty stack at key {}: {}", key, stringUtils.tableToString(stack))
         end
     end
+
+    --logger.info("Final shulkerContent: {}", stringUtils.tableToString(shulkerContent))
 
     local currentItem = inventory[shulkerSlot]
     currentItem.shulkerContent = shulkerContent -- Full table of item counts
     inventory[shulkerSlot] = currentItem
 
+    --logger.info("Final shulkerContent: {}", stringUtils.tableToString(inventory[shulkerSlot]))
     return true
 end
 
@@ -398,42 +423,12 @@ function InventoryWrapper.updateSlot(slot)
             inventory[slot] = {
                 name = details.name,
                 count = details.count,
-                shulkerContent = nil,
-                shulkerStacks = 0,
+                shulkerContent = nil
             }
         end
     else
         inventory[slot] = nil
     end
-end
-
--- Access a shulker box and track its contents
-function InventoryWrapper.accessShulker()
-    if inventory[selectedSlot] and inventory[selectedSlot].name:find("shulker_box") then
-        if turtle.place() then
-            -- Calculate how many full stacks were inside
-            local stacks = 0
-            local itemType = nil
-
-            for slot = 1, 16 do
-                local details = turtle.getItemDetail(slot)
-                if details then
-                    stacks = stacks + 1
-                    itemType = details.name
-                end
-            end
-
-            -- Update the shulker box's contents
-            inventory[selectedSlot].shulkerContent = itemType
-            inventory[selectedSlot].shulkerStacks = stacks
-
-            -- Dig the shulker box back up
-            if turtle.dig() then
-                return true
-            end
-        end
-    end
-    return false
 end
 
 -- Wrapper for suck and dig to ensure inventory stays updated

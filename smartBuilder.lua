@@ -25,7 +25,9 @@ local function parseDatFile(filename)
         y = y + 1 --convert to lua coords
         z = z + 1 --convert to lua coords
         planes[z] = planes[z] or {}
-        table.insert(planes[z], { x = x, y = y, z = z, color = color })
+        if not (color == 0) then --todo temp fix, how are we getting 0 ?
+            table.insert(planes[z], { x = x, y = y, z = z, color = color })
+        end
     end
 
     -- Define the starting position
@@ -87,7 +89,8 @@ local function buildPlane(planes, z, colorMapping)
         local material = colorMapping[color]
         if not material then
             logger.error("No material mapped for color ID=" .. color)
-            logger.error(color .. " ------- ".. stringUtils.tableToString(colorMapping))
+            --logger.error(color .. " -------plane:\n ".. stringUtils.tableToString(plane))
+            logger.error(color .. " -------\n ".. stringUtils.tableToString(colorMapping))
             return
         end
 
@@ -116,6 +119,8 @@ local function buildStructure(datFile)
     local displayedColors = ColorMapper.getDisplayedColors(datFile)
     local colorMapping = ColorMapper.getColorToMaterialMap(displayedColors)
 
+    logger.info("colorMapping: {}", stringUtils.tableOrString(colorMapping))
+
     -- inventoryWrapper.init() WHY EXACTLY ???
 
     -- Start at a safe position
@@ -141,6 +146,6 @@ end
 
 local datFile = "vox_data/Building_only04.dat"
 
-logger.init(true, false, true, "/voxBuilder.log")
+logger.init(true, true, true, "/smartBuilder.log")
 logger.runWithLog(function() buildStructure(datFile) end)
 logger.close()

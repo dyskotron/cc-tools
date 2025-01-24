@@ -37,6 +37,17 @@ function stringUtils.getSimplifiedName(fullName)
     return simpleName or fullName
 end
 
+function stringUtils.tableOrString(value)
+
+    if type(value) == "table" then
+        -- Simply call `tableToString` for tables
+        return stringUtils.tableToString(value, 1)
+    else
+        -- Handle non-table values
+        return tostring(value)
+    end
+end
+
 function stringUtils.tableToString(t, indent)
     indent = indent or 0
     local indentString = string.rep(" ", indent)
