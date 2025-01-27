@@ -3,7 +3,7 @@ import base64
 import requests
 
 # Configuration
-SOURCE_DIR = "/Users/matejosanec/IdeaProjects/lua test"
+SOURCE_DIR = "/Users/matejosanec/IdeaProjects/cctToolbox"
 SERVER_URL = "https://cooperative-whispering-jaborosa.glitch.me/upload"
 
 def url_encode(data):

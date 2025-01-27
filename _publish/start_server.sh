@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the path to the Python server script
-SERVER_SCRIPT="/Users/matejosanec/IdeaProjects/lua test/_publish/http_server.py"
+SERVER_SCRIPT="/Users/matejosanec/IdeaProjects/cctToolbox/_publish/http_server.py"
 
 # Define the name of the Python interpreter
 PYTHON_BIN="python3"

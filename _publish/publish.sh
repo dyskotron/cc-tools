@@ -22,7 +22,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Run the upload Python script
-python "$UPLOAD_SCRIPT"
+python -u "$UPLOAD_SCRIPT"
 
 # Deactivate the virtual environment
 if [ $? -eq 0 ]; then
