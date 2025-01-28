@@ -2,151 +2,142 @@ import os
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import urllib.parse
 import base64
+import hashlib
 import logging
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 
-# URL Encoding in Python
-def url_encode(data):
-    return urllib.parse.quote(data, safe='')
-
-# URL Decoding in Python
-def url_decode(data):
-    return urllib.parse.unquote(data)
+def calculate_md5(filepath):
+    """Calculate the MD5 hash of a file."""
+    hasher = hashlib.md5()
+    with open(filepath, "rb") as f:
+        chunk = f.read(8192)
+        while chunk:
+            hasher.update(chunk)
+            chunk = f.read(8192)
+    return hasher.hexdigest()
 
 class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
 
-    def list_files_recursive(self, directory):
-        files = []
-        for root, dirs, filenames in os.walk(directory):
-            for filename in filenames:
-                filepath = os.path.join(root, filename)
-                file_size = os.path.getsize(filepath)
-                # Convert the absolute path into a relative path
-                relative_path = os.path.relpath(filepath, directory)
-                # We'll store each file as "name|size"
-                files.append(f"{relative_path}|{file_size}")
-        return files
 
     def do_POST(self):
+
         if self.path == '/upload':
-            # Read the content length from the request header
+            # Handle file upload
+
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
-
-            # Parse the POST data
             data = urllib.parse.parse_qs(post_data.decode())
-
-            # Debug: Print received data
-            logging.debug("Received data: %s", data)
 
             filename = data.get('filename', [None])[0]
             file_data = data.get('data', [None])[0]
+            md5_hash = data.get('md5', [None])[0]
 
-            logging.info(f"Processing: {filename}")
-
-            # Check if filename and file data are present
-            if filename and file_data:
+            if filename and file_data and md5_hash:
                 try:
-                    # Decode file data from base64
+                    # Decode file data
                     file_data = base64.b64decode(file_data)
 
-                    # Set the new file path to the desired location
+
+                    # Set the save path
                     save_dir = os.path.expanduser('~/ccraft/matejos')
-
-                    # Ensure the directory exists
-                    os.makedirs(save_dir, exist_ok=True)
-
-                    # Define the full path where the file should be saved
                     save_path = os.path.join(save_dir, filename)
-                    # Ensure the directory structure for the file exists
                     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-                    logging.info(f"Saving file to: {save_path}")
+                    # Check for existing file and compare hashes
+                    if os.path.exists(save_path):
+                        server_md5 = calculate_md5(save_path)
+                        if server_md5 == md5_hash:
+                            self.send_response(304)  # Not Modified
+                            self.end_headers()
+                            self.wfile.write("File {0} is up-to-date.".format(filename).encode())
+                            return
 
-                    # Save the file to disk
+                    # Save the file
+
                     with open(save_path, 'wb') as f:
                         f.write(file_data)
+                        self.send_response(200)
+                        self.end_headers()
+                        self.wfile.write("File {0} uploaded successfully.".format(filename).encode())
 
-                    logging.info(f"File {filename} uploaded successfully.")
-                    self.send_response(200)
-                    self.end_headers()
-                    self.wfile.write(f"File {filename} uploaded successfully.".encode())
                 except Exception as e:
-                    logging.error(f"[log] Error writing file  {filename} - {e}")
                     self.send_response(500)
                     self.end_headers()
-                    self.wfile.write(f" [write] Error writing file {filename} - {e}".encode())
+                    self.wfile.write("Error processing file {0}: {1}".format(filename, e).encode())
             else:
-                logging.warning("Missing filename or file data.")
                 self.send_response(400)
                 self.end_headers()
-                self.wfile.write("Missing filename or file data".encode())
+                self.wfile.write("{0}".format("Missing required fields in POST request.").encode())
+
+        elif self.path == '/check_file':
+            # Handle file existence and MD5 hash check
+
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = urllib.parse.parse_qs(post_data.decode())
+
+            filename = data.get('filename', [None])[0]
+
+            if filename:
+                save_dir = os.path.expanduser('~/ccraft/matejos')
+                file_path = os.path.join(save_dir, filename)
+
+                if os.path.exists(file_path):
+                    md5 = calculate_md5(file_path)
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write('{{"md5": "{0}"}}'.format(md5).encode())
+                else:
+                    self.send_response(404)  # Not Found
+                    self.end_headers()
+                    self.wfile.write("{0}".format("File not found.").encode())
+            else:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write("{0}".format("Filename is required.").encode())
+
         else:
-            # Handle other requests with default behavior
-            super().do_POST()
+            # Return a 404 for unrecognized paths
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write("{0}".format("Unknown POST endpoint.").encode())
 
-    def do_GET(self):
-        # Handle file download and listing
-        if self.path == '/files':
-            save_dir = os.path.expanduser('~/ccraft/matejos')  # Update to the desired directory
-            try:
-                # Ensure the directory exists
-                os.makedirs(save_dir, exist_ok=True)
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = urllib.parse.parse_qs(post_data.decode())
 
-                files = self.list_files_recursive(save_dir)
-                self.send_response(200)
-                self.send_header('Content-type', 'text/plain')
+            filename = data.get('filename', [None])[0]
+
+            if not filename:
+                self.send_response(400)
                 self.end_headers()
-                # One file per line
-                response_data = "\n".join(files)
-                self.wfile.write(response_data.encode())
-            except Exception as e:
-                logging.error(f"Error listing files: {e}")
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write(f"Error listing files: {e}".encode())
+                self.wfile.write(b"Filename is required.")
+                return
 
-        elif self.path.startswith('/download'):
-            # Handle file download
-            query = self.path[len('/download?'):]  # Extract the query part of the URL
-            params = urllib.parse.parse_qs(query)  # Parse query parameters
-            file_name = params.get('filename', [None])[0]
+
             save_dir = os.path.expanduser('~/ccraft/matejos')
-            file_path = os.path.join(save_dir, file_name)  # Update to the correct directory
-
-            # Log the incoming request and resolved file path
-            logging.info(f"Received download request for: ---{self.path}---")
-            logging.info(f"Resolved file path: ---{file_path}---")
+            file_path = os.path.join(save_dir, filename)
 
             if os.path.exists(file_path):
-                try:
-                    with open(file_path, 'rb') as f:
-                        file_data = f.read()
-                        logging.info(f"Serving file: {file_name} ({len(file_data)} bytes)")
-                        self.send_response(200)
-                        self.send_header('Content-type', 'application/octet-stream')
-                        self.send_header('Content-Disposition', f'attachment; filename={os.path.basename(file_name)}')
-                        self.end_headers()
-                        self.wfile.write(file_data)
-                except Exception as e:
-                    logging.error(f"Error reading file {file_name}: {e}")
-                    self.send_response(500)
-                    self.end_headers()
-                    self.wfile.write(f"Error reading file: {e}".encode())
+                # Respond with success and file metadata
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(f"File exists: {filename}".encode())
             else:
-                logging.error(f"File not found: {file_path}")
+                # Respond with file not found
                 self.send_response(404)
                 self.end_headers()
-                self.wfile.write(f"File {file_name} not found.".encode())
-        else:
-            super().do_GET()
+                self.wfile.write(b"File not found.")
 
-def run(server_class=HTTPServer, handler_class=CustomHTTPRequestHandler, port=8000):
+
+# Start the server
+
+# Start the server
+
+def run(server_class=HTTPServer, handler_class=CustomHTTPRequestHandler, port=8010):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    logging.info(f'Starting server on port {port}...')
+    logging.info('Starting server on port {0}...'.format(port))
     httpd.serve_forever()
 
 if __name__ == '__main__':
