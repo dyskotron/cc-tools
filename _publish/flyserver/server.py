@@ -16,112 +16,141 @@ def calculate_md5(filepath):
             chunk = f.read(8192)
     return hasher.hexdigest()
 
-class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == "/files":
-            # Define the directory containing files
-            save_dir = os.path.expanduser("~/ccraft/matejos")
+def list_files_recursive(directory):
+    """Recursively lists files with their sizes."""
+    files = []
+    for root, _, filenames in os.walk(directory):
+        for filename in filenames:
+            filepath = os.path.join(root, filename)
+            file_size = os.path.getsize(filepath)  # Get file size
+            relative_path = os.path.relpath(filepath, directory)  # Get relative path
+            files.append(f"{relative_path}|{file_size}")  # Add both filename and size
+    return files
 
+class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
+
+    def do_GET(self):
+        """Handles GET requests."""
+        if self.path == "/files":
+            save_dir = "/data/matejos"
             try:
-                # Ensure the directory exists
                 os.makedirs(save_dir, exist_ok=True)
 
-                # Recursively list all files and maintain directory structure
-                file_list = []
-                for root, _, files in os.walk(save_dir):
-                    for file in files:
-                        # Preserve the full path relative to the base directory
-                        rel_path = os.path.relpath(os.path.join(root, file), save_dir)
-                        file_list.append(rel_path)
+                files = list_files_recursive(save_dir)
+                response_data = "\n".join(files)
 
-                # Send response
                 self.send_response(200)
-                self.send_header("Content-type", "text/plain")
+                self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write("\n".join(file_list).encode())
-
+                self.wfile.write(response_data.encode())
             except Exception as e:
+                logging.error(f"Error listing files: {e}")
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(f"Error listing files: {e}".encode())
-
-
-    def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        data = urllib.parse.parse_qs(post_data.decode())
-
-        if self.path == "/check_file":
-            # Handle file existence and MD5 hash check
-            filename = data.get('filename', [None])[0]
+        elif self.path.startswith("/download?"):
+            # Handle file download request
+            query = urllib.parse.urlparse(self.path).query
+            params = urllib.parse.parse_qs(query)
+            filename = params.get("filename", [None])[0]
 
             if filename:
-                save_dir = os.path.expanduser('~/ccraft/matejos')
+                save_dir = "/data/matejos"
                 file_path = os.path.join(save_dir, filename)
 
                 if os.path.exists(file_path):
-                    md5 = calculate_md5(file_path)
-                    self.send_response(200)
-                    self.end_headers()
-                    self.wfile.write(f'{{"md5": "{md5}"}}'.encode())
+                    try:
+                        with open(file_path, "rb") as f:
+                            file_data = f.read()
+                        self.send_response(200)
+                        self.send_header('Content-type', 'application/octet-stream')
+                        self.send_header('Content-Disposition', f'attachment; filename="{filename}"')
+                        self.end_headers()
+                        self.wfile.write(file_data)
+                    except Exception as e:
+                        logging.error(f"Error reading file {filename}: {e}")
+                        self.send_response(500)
+                        self.end_headers()
+                        self.wfile.write(f"Error reading file: {e}".encode())
                 else:
-                    self.send_response(404)  # Not Found
+                    logging.error(f"File not found: {file_path}")
+                    self.send_response(404)
                     self.end_headers()
-                    self.wfile.write(b"File not found.")
-            else:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(b"Filename is required.")
+                    self.wfile.write(f"File {filename} not found.".encode())
+    def do_POST(self):
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = urllib.parse.parse_qs(post_data.decode())
 
-        elif self.path == "/upload":
-            # Existing upload logic
-            filename = data.get('filename', [None])[0]
-            file_data = data.get('data', [None])[0]
-            md5_hash = data.get('md5', [None])[0]
+            if self.path == "/check_file":
+                # Handle file existence and MD5 hash check
+                filename = data.get('filename', [None])[0]
 
-            if filename and file_data and md5_hash:
-                try:
-                    # Decode file data
-                    file_data = base64.b64decode(file_data)
+                if filename:
+                    save_dir = "/data/matejos"
+                    file_path = os.path.join(save_dir, filename)
 
-                    # Set the save path
-                    save_dir = os.path.expanduser('~/ccraft/matejos')
-                    save_path = os.path.join(save_dir, filename)
-                    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-
-                    # Check for existing file and compare hashes
-                    if os.path.exists(save_path):
-                        server_md5 = calculate_md5(save_path)
-                        if server_md5 == md5_hash:
-                            self.send_response(304)  # Not Modified
-                            self.end_headers()
-                            self.wfile.write(f"File {filename} is up-to-date.".encode())
-                            return
-
-                    # Save the file
-                    with open(save_path, 'wb') as f:
-                        f.write(file_data)
+                    if os.path.exists(file_path):
+                        md5 = calculate_md5(file_path)
                         self.send_response(200)
                         self.end_headers()
-                        self.wfile.write(f"File {filename} uploaded successfully.".encode())
-
-                except Exception as e:
-                    self.send_response(500)
+                        self.wfile.write(f'{{"md5": "{md5}"}}'.encode())
+                    else:
+                        self.send_response(404)  # Not Found
+                        self.end_headers()
+                        self.wfile.write(b"File not found.")
+                else:
+                    self.send_response(400)
                     self.end_headers()
-                    self.wfile.write(f"Error processing file {filename}: {e}".encode())
+                    self.wfile.write(b"Filename is required.")
+
+            elif self.path == "/upload":
+                # Existing upload logic
+                filename = data.get('filename', [None])[0]
+                file_data = data.get('data', [None])[0]
+                md5_hash = data.get('md5', [None])[0]
+
+                if filename and file_data and md5_hash:
+                    try:
+                        # Decode file data
+                        file_data = base64.b64decode(file_data)
+
+                        # Set the save path
+                        save_dir = "/data/matejos"
+                        save_path = os.path.join(save_dir, filename)
+                        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+                        # Check for existing file and compare hashes
+                        if os.path.exists(save_path):
+                            server_md5 = calculate_md5(save_path)
+                            if server_md5 == md5_hash:
+                                self.send_response(304)  # Not Modified
+                                self.end_headers()
+                                self.wfile.write(f"File {filename} is up-to-date.".encode())
+                                return
+
+                        # Save the file
+                        with open(save_path, 'wb') as f:
+                            f.write(file_data)
+                            self.send_response(200)
+                            self.end_headers()
+                            self.wfile.write(f"File {filename} uploaded successfully.".encode())
+
+                    except Exception as e:
+                        self.send_response(500)
+                        self.end_headers()
+                        self.wfile.write(f"Error processing file {filename}: {e}".encode())
+
+                else:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write(b"Missing required fields in POST request.")
 
             else:
-                self.send_response(400)
+                # Return a 404 for unrecognized paths
+                self.send_response(404)
                 self.end_headers()
-                self.wfile.write(b"Missing required fields in POST request.")
-
-        else:
-            # Return a 404 for unrecognized paths
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write(b"Unknown POST endpoint.")
-
-# Start the server
+                self.wfile.write(b"Unknown POST endpoint.")
 
 # Start the server
 

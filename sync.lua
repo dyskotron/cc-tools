@@ -1,10 +1,10 @@
 local progressBar = require("Modules.ui.progressBar")
-local logger = require("Modules.ui.logger")
+local logger = require("Modules.utils.logger")
 
 -- Configuration
-local SERVER_URL = "hhttps://spectacled-clammy-mask.glitch.me:3000"  -- Change to the correct IP if needed
-local DOWNLOAD_COMMAND = "/download"         -- URL for downloading files
-local FILES_COMMAND = "/files"               -- URL for retrieving available files
+local SERVER_URL = "https://publish-fragrant-cloud-3528.fly.dev"  -- Updated Fly.io Server URL
+local DOWNLOAD_COMMAND = "/download"
+local FILES_COMMAND = "/files"
 
 --------------------------------------------------------------------------
 -- DOWNLOAD LOGIC
@@ -15,20 +15,20 @@ function fetchFileMetadata()
     local url = SERVER_URL .. FILES_COMMAND
     local response = http.get(url)
     if not response then
-        logger.logMessage("Error: Unable to fetch file list from server.")
+        logger.info("Error: Unable to fetch file list from server.")
         return nil, nil
     end
 
     local raw_data = response.readAll()
     response.close()
 
-    logger.logMessage("Raw server response:\n" .. raw_data)
+    logger.info("Raw server response:\n" .. raw_data)
 
     local files = {}
     local totalBytes = 0
 
     for line in raw_data:gmatch("[^\n]+") do
-        logger.logMessage("Processing line: " .. tostring(line))
+        logger.info("Processing line: " .. tostring(line))
 
         -- Extract filename and size
         local filename, size = line:match("([^|]+)|(%d+)")
@@ -37,31 +37,31 @@ function fetchFileMetadata()
             if size >= 0 then
                 table.insert(files, {name = filename, size = size})
                 totalBytes = totalBytes + size
-                logger.logMessage("Added file: " .. filename .. ", Size: " .. size)
+                logger.info("Added file: " .. filename .. ", Size: " .. size)
             else
-                logger.logMessage("Invalid file size (negative): " .. tostring(filename))
+                logger.info("Invalid file size (negative): " .. tostring(filename))
             end
         else
-            logger.logMessage("Failed to parse line: " .. tostring(line))
+            logger.info("Failed to parse line: " .. tostring(line))
         end
     end
 
     if #files == 0 then
-        logger.logMessage("No valid files found in metadata response.")
+        logger.info("No valid files found in metadata response.")
         return nil, nil
     end
 
-    logger.logMessage("Parsed files: " .. textutils.serialize(files))
+    logger.info("Parsed files: " .. textutils.serialize(files))
     return files, totalBytes
 end
 
 function downloadFile(filename)
-    logger.logMessage("Starting download for: " .. filename)
+    logger.info("Starting download for: " .. filename)
 
-    local url = SERVER_URL .. DOWNLOAD_COMMAND .. "?filename=" .. filename
+    local url = SERVER_URL .. DOWNLOAD_COMMAND .. "?filename=" .. textutils.urlEncode(filename)
     local response = http.get(url)
     if not response then
-        logger.logMessage("Failed to fetch file from server: " .. filename)
+        logger.info("Failed to fetch file from server: " .. filename)
         progressBar.render(1.0, "Failed: " .. filename)
         sleep(1)
         return
@@ -69,13 +69,13 @@ function downloadFile(filename)
 
     local data = response.readAll()
     response.close()
-    logger.logMessage("Received data for: " .. filename)
+    logger.info("Received data for: " .. filename)
 
     -- Create the directory if necessary
     local dir = fs.getDir(filename)
     if not fs.exists(dir) then
         fs.makeDir(dir)
-        logger.logMessage("Created directory: " .. dir)
+        logger.info("Created directory: " .. dir)
     end
 
     -- Write in chunks with progress bar updates
@@ -85,7 +85,7 @@ function downloadFile(filename)
 
     local file = fs.open(filename, "w")
     if not file then
-        logger.logMessage("Failed to open file for writing: " .. filename)
+        logger.info("Failed to open file for writing: " .. filename)
         return
     end
 
@@ -103,14 +103,14 @@ function downloadFile(filename)
     end
     file.close()
 
-    logger.logMessage("Completed download: " .. filename)
+    logger.info("Completed download: " .. filename)
     progressBar.render(1.0, "Update complete: " .. filename)
     sleep(0.5)
 end
 
 function downloadAllFiles(files, totalBytes)
     if not files or #files == 0 then
-        logger.logMessage("No files to download.")
+        logger.info("No files to download.")
         progressBar.render(1.0, "No files to update.")
         sleep(1)
         return
@@ -123,15 +123,15 @@ function downloadAllFiles(files, totalBytes)
         local fileSize = file.size
 
         if filename == nil then
-            logger.logMessage("Error: filename is nil for file object: " .. textutils.serialize(file))
+            logger.info("Error: filename is nil for file object: " .. textutils.serialize(file))
         else
-            logger.logMessage("Downloading: " .. filename)
+            logger.info("Downloading: " .. filename)
         end
 
-        local url = SERVER_URL .. DOWNLOAD_COMMAND .. "?filename=" .. filename
+        local url = SERVER_URL .. DOWNLOAD_COMMAND .. "?filename=" .. textutils.urlEncode(filename)
         local response = http.get(url)
         if not response then
-            logger.logMessage("Error: Failed to download " .. filename)
+            logger.info("Error: Failed to download " .. filename)
             progressBar.render(bytesDownloaded / totalBytes, "Failed: " .. filename)
             sleep(1)
             return
@@ -144,7 +144,7 @@ function downloadAllFiles(files, totalBytes)
         local dir = fs.getDir(filename)
         if not fs.exists(dir) then
             fs.makeDir(dir)
-            logger.logMessage("Created directory: " .. dir)
+            logger.info("Created directory: " .. dir)
         end
 
         -- Save the file
@@ -153,7 +153,7 @@ function downloadAllFiles(files, totalBytes)
             fileHandle.write(data)
             fileHandle.close()
         else
-            logger.logMessage("Error: Failed to save file " .. filename)
+            logger.info("Error: Failed to save file " .. filename)
         end
 
         -- Update cumulative progress
@@ -165,7 +165,7 @@ function downloadAllFiles(files, totalBytes)
         local sleepTime = fileSize / totalBytes * 6  -- Adjust for total duration
         sleep(sleepTime)
     end
-    logger.logMessage("All files downloaded successfully.")
+    logger.info("All files downloaded successfully.")
     progressBar.render(1.0, "All files updated.")
     sleep(2) -- Pause to show final progress
 end
@@ -174,16 +174,16 @@ end
 -- MAIN
 --------------------------------------------------------------------------
 function main()
-    logger.clearLogFile()
-    logger.logMessage("Sync started. Downloading files...\n")
+    logger.init(true, true, false)
+    logger.info("Sync started. Downloading files...\n")
 
     -- Fetch metadata and process files
     local files, totalBytes = fetchFileMetadata()
     if files and totalBytes then
         downloadAllFiles(files, totalBytes)
-        logger.logMessage("All files updated successfully.\n")
+        logger.info("All files updated successfully.\n")
     else
-        logger.logMessage("Error: Failed to fetch file metadata.\n")
+        logger.error("Error: Failed to fetch file metadata.\n")
     end
 end
 
