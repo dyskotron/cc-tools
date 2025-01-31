@@ -5,8 +5,10 @@ import requests
 
 # Configuration
 SOURCE_DIR = "/Users/matejosanec/IdeaProjects/cctToolbox"
-SERVER_URL = "https://spectacled-clammy-mask.glitch.me/upload"
-CHECK_FILE_ENDPOINT = "https://spectacled-clammy-mask.glitch.me/check_file"
+
+BASE_URL = "https://publish-fragrant-cloud-3528.fly.dev"
+UPLOAD_ENDPOINT = f"{BASE_URL}/upload"
+CHECK_FILE_ENDPOINT = f"{BASE_URL}/check_file"
 
 def calculate_md5(filepath):
     """Calculate the MD5 hash of a file."""
@@ -29,7 +31,7 @@ def upload_file(filepath, relative_path):
     local_md5 = calculate_md5(filepath)
 
     # Check if the file exists on the server and compare hashes
-    response = requests.post(CHECK_FILE_ENDPOINT, json={"filename": relative_path})
+    response = requests.post(CHECK_FILE_ENDPOINT, data={"filename": relative_path})
     if response.status_code == 200:
         server_md5 = response.json().get("md5")
         if server_md5 == local_md5:
@@ -55,7 +57,7 @@ def upload_file(filepath, relative_path):
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     # Send the POST request
-    response = requests.post(SERVER_URL, data=payload, headers=headers)
+    response = requests.post(UPLOAD_ENDPOINT, data=payload, headers=headers)
 
     if response.status_code == 200:
         print(f"{relative_path} uploaded successfully.")

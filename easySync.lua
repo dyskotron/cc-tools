@@ -1,38 +1,4 @@
--- Simplified Sync Script for Downloading Files
-
--- Base64 Encoding/Decoding (Required for File Data)
-local base64 = {}
-local base64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-local charAt, indexOf = {}, {}
-local blshift = bit32.lshift
-local brshift = bit32.rshift
-local band = bit32.band
-local bor = bit32.bor
-
-for i = 1, #base64chars do
-    local char = base64chars:sub(i, i)
-    charAt[i - 1] = char
-    indexOf[char] = i - 1
-end
-
-function base64.decode(data)
-    local decoded = {}
-    local inChars = {}
-    for char in data:gmatch(".") do
-        inChars[#inChars + 1] = char
-    end
-    for i = 1, #inChars, 4 do
-        local b = {indexOf[inChars[i]], indexOf[inChars[i + 1]], indexOf[inChars[i + 2]], indexOf[inChars[i + 3]]}
-        decoded[#decoded + 1] = bor(blshift(b[1], 2), brshift(b[2], 4)) % 256
-        if b[3] < 64 then
-            decoded[#decoded + 1] = bor(blshift(b[2], 4), brshift(b[3], 2)) % 256
-            if b[4] < 64 then
-                decoded[#decoded + 1] = bor(blshift(b[3], 6), b[4]) % 256
-            end
-        end
-    end
-    return string.char(unpack(decoded))
-end
+-- Compact Sync Script for Downloading Files
 
 -- Progress Bar Display
 local function renderProgressBar(progress, message)
@@ -58,12 +24,15 @@ local function renderProgressBar(progress, message)
     term.write(" " .. percent .. "%")
 end
 
--- Download Logic
-local SERVER_URL = "https://cooperative-whispering-jaborosa.glitch.me"
+-- Server Configuration
+local SERVER_URL = "https://spectacled-clammy-mask.glitch.me"
 local FILES_COMMAND = "/files"
 local DOWNLOAD_COMMAND = "/download"
 
+-- Fetch and process file metadata
 local function fetchFileMetadata()
+    print("Fetching file metadata from server...")
+
     local response = http.get(SERVER_URL .. FILES_COMMAND)
     if not response then
         print("Error: Unable to fetch file list from server.")
@@ -72,6 +41,13 @@ local function fetchFileMetadata()
 
     local raw_data = response.readAll()
     response.close()
+
+    if not raw_data or raw_data == "" then
+        print("Error: Server returned an empty response.")
+        return nil, nil
+    end
+
+    print("Raw Data Received:\n" .. raw_data)
 
     local files = {}
     local totalBytes = 0
@@ -82,12 +58,23 @@ local function fetchFileMetadata()
             size = tonumber(size)
             table.insert(files, {name = filename, size = size})
             totalBytes = totalBytes + size
+            print("Parsed file:", filename, "Size:", size)
+        else
+            print("Warning: Could not parse line:", line)
         end
     end
 
+    if #files == 0 then
+        print("No valid files found.")
+        return nil, nil
+    end
+
+    print("File metadata fetched successfully.")
     return files, totalBytes
 end
 
+
+-- Download a single file
 local function downloadFile(filename)
     local url = SERVER_URL .. DOWNLOAD_COMMAND .. "?filename=" .. textutils.urlEncode(filename)
     local response = http.get(url)
@@ -111,6 +98,7 @@ local function downloadFile(filename)
     file.close()
 end
 
+-- Download all files from the server
 local function downloadAllFiles()
     local files, totalBytes = fetchFileMetadata()
     if not files or #files == 0 then
@@ -133,7 +121,7 @@ local function downloadAllFiles()
     sleep(2)
 end
 
--- Initialize and Run
+-- Main Execution
 local function main()
     print("Starting file sync...")
     downloadAllFiles()

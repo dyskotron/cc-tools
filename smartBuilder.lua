@@ -1,75 +1,8 @@
 local inventoryWrapper = require("Modules.InventoryWrapper")
 local traverseHelper = require("Modules.traverseHelper")
 local ColorMapper = require("Modules.colorMapper")
+local datParser = require("datParser") -- New parser module
 local logger = require("Modules.utils.logger")
-local stringUtils = require("Modules.utils.stringUtils")
-
-local function parseDatFile(filename)
-    local file = fs.open(filename, "rb")
-    if not file then
-        error("Failed to open .dat file: " .. filename)
-    end
-
-    -- Read dimensions and voxel count
-    local length = string.unpack("<I4", file.read(4))
-    local width = string.unpack("<I4", file.read(4))
-    local height = string.unpack("<I4", file.read(4))
-    local voxel_count = string.unpack("<I4", file.read(4))
-
-    local planes = {}
-
-    -- Read and group voxels by Z-plane
-    for _ = 1, voxel_count do
-        local x, y, z, color = string.unpack("<BBBB", file.read(4))
-        x = x + 1 --convert to lua coords
-        y = y + 1 --convert to lua coords
-        z = z + 1 --convert to lua coords
-        planes[z] = planes[z] or {}
-        if not (color == 0) then --todo temp fix, how are we getting 0 ?
-            table.insert(planes[z], { x = x, y = y, z = z, color = color })
-        end
-    end
-
-    -- Define the starting position
-    local current_position = { x = 1, y = 0 } -- Start position
-
-    -- Sort each plane based on Manhattan distance
-    for z, plane_voxels in pairs(planes) do
-        local sorted_plane = {}
-
-        while #plane_voxels > 0 do
-            -- Find the closest voxel
-            local closest_index = 1
-            local closest_distance = math.huge
-            for i, voxel in ipairs(plane_voxels) do
-                local distance = math.abs(current_position.x - voxel.x) + math.abs(current_position.y - voxel.y)
-                if distance < closest_distance then
-                    closest_distance = distance
-                    closest_index = i
-                end
-            end
-
-            -- Add the closest voxel to the sorted list
-            local closest_voxel = table.remove(plane_voxels, closest_index)
-            table.insert(sorted_plane, closest_voxel)
-
-            -- Update the current position
-            current_position.x, current_position.y = closest_voxel.x, closest_voxel.y
-        end
-
-        -- Replace the original plane with the sorted list
-        planes[z] = sorted_plane
-    end
-
-    file.close()
-
-    return {
-        length = length,
-        width = width,
-        height = height,
-        planes = planes, -- Sorted list of voxels for each plane
-    }
-end
 
 -- Function to build one plane
 local function buildPlane(planes, z, colorMapping)
@@ -79,27 +12,18 @@ local function buildPlane(planes, z, colorMapping)
         return false
     end
 
-    for _, voxel in pairs(plane) do
-        local x = voxel.x
-        local y = voxel.y
-        local z = voxel.z
-        local color = voxel.color
-
-        -- Get material for the voxel's color
+    for _, voxel in ipairs(plane) do
+        local x, y, z, color = voxel.x, voxel.y, voxel.z, voxel.color
         local material = colorMapping[color]
         if not material then
             logger.error("No material mapped for color ID=" .. color)
-            --logger.error(color .. " -------plane:\n ".. stringUtils.tableToString(plane))
-            logger.error(color .. " -------\n ".. stringUtils.tableToString(colorMapping))
             return false
         end
 
-        -- Move directly to the voxel's position
         logger.info("Moving to X=" .. x .. ", Y=" .. y .. ", Z=" .. z)
-        traverseHelper.traverseY(y) -- Absolute Y position
-        traverseHelper.traverseX(x) -- Absolute X position
+        traverseHelper.traverseY(y)
+        traverseHelper.traverseX(x)
 
-        -- Place the block
         if inventoryWrapper.placeDown(material) then
             logger.info("Placed " .. material .. " at X=" .. x .. ", Y=" .. y .. ", Z=" .. z)
         else
@@ -111,46 +35,33 @@ local function buildPlane(planes, z, colorMapping)
 end
 
 -- Build the structure plane by plane
-local function buildStructure(datFile)
-    logger.info("Starting build from file: " .. datFile)
-
-    -- Parse .dat file
-    local model = parseDatFile(datFile)
-
-    -- Map colors to materials using ColorMapper
-    local displayedColors = ColorMapper.getDisplayedColors(datFile)
-    local colorMapping = ColorMapper.getColorToMaterialMap(displayedColors)
-
-    logger.info("colorMapping: {}", stringUtils.tableToString(colorMapping))
-
-    -- inventoryWrapper.init() WHY EXACTLY ???
-
-    -- Start at a safe position
+local function buildStructure(parsedModel, colorMapping)
     traverseHelper.moveUpDestructive()
     traverseHelper.moveForwardDestructive()
 
-    logger.info("building model with height {} numPlanes: {}", model.height, #model.planes)
-
-    -- Build plane by plane
-    for z = 1, model.height do
+    for z = 1, parsedModel.height do
         logger.info("Moving to plane Z=" .. z)
-        traverseHelper.traverseZ(z) -- Move to the Z position of the plane
-        if not buildPlane(model.planes, z, colorMapping) then -- Pass the color-to-material mapping
-            logger.error("buildPlane returned false quitting the build")
+        traverseHelper.traverseZ(z)
+        if not buildPlane(parsedModel.planes, z, colorMapping) then
+            logger.error("Aborting build due to missing materials or failure")
             return
         end
     end
 
-    logger.info("Build completed for file: " .. datFile)
-
-    -- Reset turtle's position
-    traverseHelper.traverseY(1, nil, nil)
-    traverseHelper.traverseX(0, nil, nil)
-    traverseHelper.traverseZ(0, nil, nil)
+    traverseHelper.traverseY(1)
+    traverseHelper.traverseX(0)
+    traverseHelper.traverseZ(0)
 end
 
+-- Main execution
 local datFile = "vox_data/Building_only04.dat"
-
 logger.init(true, true, true, "/smartBuilder.log")
-logger.runWithLog(function() buildStructure(datFile) end)
+
+logger.runWithLog(function()
+    local parsedModel = datParser.parseDatFile(datFile)
+    local displayedColors = ColorMapper.getDisplayedColors(datFile)
+    local colorMapping = ColorMapper.getColorToMaterialMap(displayedColors)
+    buildStructure(parsedModel, colorMapping)
+end)
+
 logger.close()
