@@ -14,6 +14,7 @@ local function parseDatFile(filename)
 
     local planes = {}
 
+
     -- Read and group voxels by Z-plane
     for _ = 1, voxel_count do
         local x, y, z, color = string.unpack("<BBBB", file.read(4))
