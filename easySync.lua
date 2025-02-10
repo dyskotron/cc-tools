@@ -1,4 +1,13 @@
 progressBar = {}
+logger = {}
+
+function logger.logMessage(string)
+    print(string)
+end
+
+function logger.clearLogFile()
+
+end
 
 -- Progress Bar Display
 function progressBar.render(progress, message)
@@ -25,7 +34,7 @@ function progressBar.render(progress, message)
 end
 
 -- Server Configuration
-local SERVER_URL = "https://spectacled-clammy-mask.glitch.me"
+local SERVER_URL = "https://publish-fragrant-cloud-3528.fly.dev"
 local FILES_COMMAND = "/files"
 local DOWNLOAD_COMMAND = "/download"
 
@@ -72,9 +81,6 @@ local function fetchFileMetadata()
     print("File metadata fetched successfully.")
     return files, totalBytes
 end
-
-local progressBar = require("Modules.ui.progressBar")
-local logger = require("Modules.ui.logger")
 
 -- Configuration
 local SERVER_URL = "https://publish-fragrant-cloud-3528.fly.dev"  -- Updated Fly.io Server URL
@@ -242,7 +248,6 @@ function downloadAllFiles(files, totalBytes)
     end
     logger.logMessage("All files downloaded successfully.")
     progressBar.render(1.0, "All files updated.")
-    sleep(2) -- Pause to show final progress
 end
 
 --------------------------------------------------------------------------
