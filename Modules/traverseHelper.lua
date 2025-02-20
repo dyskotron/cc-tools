@@ -20,6 +20,10 @@ local traverseHelper = {
     transform = { position = { x = 1, y = 1, z = 1 }, direction = 0 } -- Default transform
 }
 
+function traverseHelper.init(position, direction)
+    transform = { position, direction} -- Default transform
+end
+
 function traverseHelper.normalizeDirection(dir)
     return (dir + 360) % 360
 end
@@ -114,6 +118,7 @@ function traverseHelper.traverseZ(targetZ, area, posUpdate, context)
 end
 
 function traverseHelper.traverseTo(destination)
+    print("traverseHelper.traverseTo: (" .. traverseHelper.transform.position.x .. ", " .. traverseHelper.transform.position.y .. ", " .. traverseHelper.transform.position.z .. ")")
     traverseHelper.traverseZ(destination.z, nil, nil)
     traverseHelper.traverseX(destination.x, nil, nil)
     traverseHelper.traverseY(destination.y, nil, nil)

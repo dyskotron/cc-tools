@@ -1,0 +1,1 @@
+shell.run("copy /bootstrap/startup.lua /disk/startup.lua")

@@ -2,7 +2,7 @@ View = require("Modules.ui.view")
 ListView = require("Modules.ui.listView")
 tableUtils = require("Modules.utils.tableUtils")
 logger = require("Modules.utils.logger")
-dirUtils = require("Modules.utils.dirUtils")
+dirUtils = require("Modules.utils.fileUtils")
 keyReceiver = require("Modules.keyReceiver")
 
 -- Initialize the two lists
