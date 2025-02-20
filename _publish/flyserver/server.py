@@ -84,6 +84,17 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         data = urllib.parse.parse_qs(post_data.decode())
 
+
+
+        # Require password for uploads
+        UPLOAD_PASSWORD = os.getenv("UPLOAD_PASSWORD")
+        provided_password = data.get('password', [None])[0]
+        if provided_password != UPLOAD_PASSWORD:
+            self.send_response(403)
+            self.end_headers()
+            self.wfile.write(b"Forbidden: Invalid password.")
+            return
+
         if self.path == "/upload":
             # Existing upload logic
             filename = data.get('filename', [None])[0]

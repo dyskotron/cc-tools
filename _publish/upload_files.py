@@ -4,6 +4,8 @@ import hashlib
 import requests
 from urllib.parse import quote
 
+UPLOAD_PASSWORD = os.getenv("CCTOOLS_UPLOAD_PASSWORD")  #
+
 # Configuration
 SOURCE_DIR = "/Users/matejosanec/IdeaProjects/cctToolbox"
 BASE_URL = "https://publish-fragrant-cloud-3528.fly.dev"
@@ -56,7 +58,7 @@ def upload_file(filepath, relative_path, server_files):
     encoded_data = url_encode(encoded_content)
 
     # Prepare the payload including the MD5 hash.
-    payload = f"filename={encoded_filename}&data={encoded_data}"
+    payload = f"password={UPLOAD_PASSWORD}&filename={encoded_filename}&data={encoded_data}"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     response = requests.post(UPLOAD_ENDPOINT, data=payload, headers=headers)
