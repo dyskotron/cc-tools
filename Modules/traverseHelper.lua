@@ -21,7 +21,7 @@ local traverseHelper = {
 }
 
 function traverseHelper.init(position, direction)
-    traverseHelper.transform = { position, direction} -- Default transform
+    traverseHelper.transform = { position = position, direction = direction} -- Default transform
 end
 
 function traverseHelper.normalizeDirection(dir)
