@@ -8,6 +8,8 @@ local selectedSlot = 1 -- Track the currently selected slot
 
 local function place(itemName, placeMethod, autoSelect)
     autoSelect = autoSelect ~= false
+    --todo: add checking if it is already placed
+    --todo: ensure empty slot is empty otherwise it breaks the inventory data, especiayup workedly if slot reserved for shulkers is filled
     if not autoSelect or InventoryWrapper.select(itemName, true) then
         placeMethod()
         InventoryWrapper.updateAfterPlace()

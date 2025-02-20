@@ -1,8 +1,9 @@
 local inventoryWrapper = require("Modules.InventoryWrapper")
 local traverseHelper = require("Modules.traverseHelper")
 local ColorMapper = require("Modules.colorMapper")
-local datParser = require("datParser") -- New parser module
+local voxParser = require("Builder.voxParser")
 local logger = require("Modules.utils.logger")
+
 
 -- Function to build one plane
 local function buildPlane(planes, z, colorMapping)
@@ -58,7 +59,7 @@ local datFile = "vox_data/Building_only04.dat"
 logger.init(true, true, true, "/smartBuilder.log")
 
 logger.runWithLog(function()
-    local parsedModel = datParser.parseDatFile(datFile)
+    local parsedModel = voxParser.parseDatFile(datFile)
     local displayedColors = ColorMapper.getDisplayedColors(datFile)
     local colorMapping = ColorMapper.getColorToMaterialMap(displayedColors)
     buildStructure(parsedModel, colorMapping)

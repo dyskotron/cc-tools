@@ -35,6 +35,16 @@ function ColorMapper.getDisplayedColors(filename)
         usedColors[index] = { r = r, g = g, b = b, count = 0, slot = 2 ^ (i - 1) }
     end
 
+    local currentPos = file.seek("cur")
+    local remainingBytes = file.seek("end") - currentPos
+    file.seek("set", currentPos) -- Restore position
+
+    if remainingBytes < voxel_count * 4 then
+        error("Voxel count is too high! Expected " .. (voxel_count * 4) .. " bytes, but only " .. remainingBytes .. " are available.")
+    end
+
+
+
     -- Read voxel data and increment counts for each color
     for _ = 1, voxel_count do
         local x, y, z, color_index = string.unpack("<BBBB", file.read(4))

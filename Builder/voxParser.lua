@@ -1,6 +1,8 @@
 local logger = require("Modules.utils.logger")
 
-local function parseDatFile(filename)
+voxParser = {}
+
+function voxParser.parseDatFile(filename)
     local file = fs.open(filename, "rb")
     if not file then
         error("Failed to open .dat file: " .. filename)
@@ -52,4 +54,5 @@ local function parseDatFile(filename)
     return { length = length, width = width, height = height, planes = planes }
 end
 
-return { parseDatFile = parseDatFile }
+
+return voxParser

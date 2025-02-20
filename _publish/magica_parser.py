@@ -27,6 +27,12 @@ class VoxFileParser:
 
                 elif chunk_id == "XYZI":
                     num_voxels = struct.unpack("<I", f.read(4))[0]
+
+                    # ========== DEBUG
+                    if num_voxels * 4 > file_size - f.tell():
+                        raise ValueError(f"Voxel count too high! Expected at most {(file_size - f.tell()) // 4}, but got {num_voxels}.")
+                    # ========== DEBUG
+
                     self.voxels = [struct.unpack("<4B", f.read(4)) for _ in range(num_voxels)]
 
                 elif chunk_id == "RGBA":
@@ -43,6 +49,12 @@ class VoxFileParser:
 
         # Create a list of used colors with their RGB values and counts
         for index, count in color_counter.items():
+
+            # ========== DEBUG
+            if not (1 <= index <= 256):
+                raise ValueError(f"Invalid color index: {index}")
+            # ========== DEBUG
+
             r, g, b, a = self.palette[index - 1]  # Palette is 0-based
             if a > 0:  # Include only colors with non-zero alpha
                 self.colors.append({"index": index, "rgb": (r, g, b), "count": count})
@@ -52,21 +64,39 @@ class VoxFileParser:
         voxel_count = len(self.voxels)
 
         with open(output_path, "wb") as f:
-            # Write header
-            f.write(struct.pack("<3I", length, width, height))  # Dimensions
-            f.write(struct.pack("<I", voxel_count))  # Total voxel count
+            # Write header: dimensions and voxel count
+            f.write(struct.pack("<4I", length, width, height, voxel_count))
 
-            # Write color information
-            f.write(struct.pack("<I", len(self.colors)))  # Number of used colors
-            for color in self.colors:
-                r, g, b = color["rgb"]
-                f.write(struct.pack("<4B", color["index"], r, g, b))  # Index and RGB
+            # Write color palette information
+            color_indices = list(set(voxel[3] for voxel in self.voxels))
+            color_count = len(color_indices)
+            if color_count > 16:
+                raise ValueError(f"Too many colors used! Found {color_count}, but only 16 are allowed.")
+
+            f.write(struct.pack("<I", color_count))
+
+            for index in color_indices:
+                if not (1 <= index <= 256):
+                    raise ValueError(f"Invalid color index: {index}")  # Ensure index is within range
+                r, g, b, a = self.palette[index - 1]  # Palette is 0-based
+                f.write(struct.pack("<BBBB", index, r, g, b))
 
             # Write voxel data
-            for voxel in self.voxels:
-                f.write(struct.pack("<4B", *voxel))
+            for x, y, z, color_index in self.voxels:
+                if not (1 <= color_index <= 256):
+                    raise ValueError(f"Invalid voxel color index: {color_index}")
+                f.write(struct.pack("<BBBB", x, y, z, color_index))
 
-        self.log_summary(output_path)
+            # Ensure all data is written
+            f.flush()
+
+        # Validate final file size
+        actual_size = os.path.getsize(output_path)
+        expected_size = 16 + 4 + (color_count * 4) + (voxel_count * 4)  # Adjusted expected size calculation
+
+        if actual_size != expected_size:
+            raise ValueError(f"File size mismatch! Expected {expected_size} bytes, got {actual_size}.")
+
 
     def log_summary(self, output_path):
         length, width, height = self.size
