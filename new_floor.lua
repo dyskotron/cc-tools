@@ -16,7 +16,6 @@ if faceEast() then
     print("local pos x:" .. x .. " y:" .. y .. " z:" .. z)
     local chunkOrigin = gpsUtils.getChunkPos(pos)
     print("chunkOrigin x:" .. chunkOrigin.x .. " y:" .. chunkOrigin.y .. " z:" .. chunkOrigin.z)
-    local th = traverseHelper;
-    th.init(chunkOrigin, 0)
-    th.traverseTo({x=0,y=0,z=0})
+    traverseHelper.init(chunkOrigin, 0)
+    traverseHelper.traverseTo({x=0,y=chunkOrigin.y,z=0})
 end
