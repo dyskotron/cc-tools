@@ -7,7 +7,8 @@ from urllib.parse import quote
 UPLOAD_PASSWORD = os.getenv("CCTOOLS_UPLOAD_PASSWORD")  #
 
 # Configuration
-SOURCE_DIR = "/Users/matejosanec/IdeaProjects/cctToolbox"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SOURCE_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 BASE_URL = "https://publish-fragrant-cloud-3528.fly.dev"
 UPLOAD_ENDPOINT = f"{BASE_URL}/upload"
 # The per-file check endpoint is no longer needed:
