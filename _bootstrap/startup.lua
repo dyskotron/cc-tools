@@ -1,3 +1,4 @@
+-- pastebin get https://pastebin.com/xtLbHfp5 disk/startup.lua
 local diskPath = "disk/" -- Default mount path for the disk
 local easySyncPath = diskPath .. "easySync"
 local syncScript = "/sync.lua"
