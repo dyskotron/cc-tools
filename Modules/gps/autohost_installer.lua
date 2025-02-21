@@ -50,8 +50,9 @@ if hasModem() then
 end
 
 
-
--- Fallback: GPS host setup (old behavior)
+if fs.exists("gps_data.txt") then
+    fs.delete("gps_data.txt")
+end
 if fs.exists("startup.lua") then
     fs.delete("startup.lua")
 end
