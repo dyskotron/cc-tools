@@ -20,8 +20,9 @@ local traverseHelper = {
     transform = { position = { x = 1, y = 1, z = 1 }, direction = 0 } -- Default transform
 }
 
-function traverseHelper.init(position, direction)
-    traverseHelper.transform = { position = position, direction = direction} -- Default transform
+function traverseHelper.init(chunkOrigin, direction)
+    traverseHelper.transform.position = chunkOrigin
+    traverseHelper.transform.direction = direction
 end
 
 function traverseHelper.normalizeDirection(dir)
@@ -88,10 +89,15 @@ end
 function traverseHelper.traverseY(targetY, area, posUpdate, context)
     local deltaY = targetY - traverseHelper.transform.position.y
     if deltaY ~= 0 then
-        traverseHelper.faceDirection(deltaY > 0 and 90 or 270) -- Face north or south
         for i = 1, math.abs(deltaY) do
-            traverseHelper.moveForwardDestructive()
-            traverseHelper.transform.position.y = traverseHelper.transform.position.y + (deltaY > 0 and 1 or -1)
+            if deltaY > 0 then
+                traverseHelper.moveUpDestructive()
+                print("targetY: " .. targetY .. " dest Y: " .. traverseHelper.transform.position.y .. " deltaY: " .. deltaY)
+                traverseHelper.transform.position.y = traverseHelper.transform.position.y + 1
+            else
+                traverseHelper.moveDownDestructive()
+                traverseHelper.transform.position.y = traverseHelper.transform.position.y - 1
+            end
             if posUpdate then
                 posUpdate(traverseHelper.transform.position, area, context)
             end
@@ -102,14 +108,10 @@ end
 function traverseHelper.traverseZ(targetZ, area, posUpdate, context)
     local deltaZ = targetZ - traverseHelper.transform.position.z
     if deltaZ ~= 0 then
+        traverseHelper.faceDirection(deltaZ > 0 and 90 or 270) -- Face north or south
         for i = 1, math.abs(deltaZ) do
-            if deltaZ > 0 then
-                traverseHelper.moveUpDestructive()
-                traverseHelper.transform.position.z = traverseHelper.transform.position.z + 1
-            else
-                traverseHelper.moveDownDestructive()
-                traverseHelper.transform.position.z = traverseHelper.transform.position.z - 1
-            end
+            traverseHelper.moveForwardDestructive()
+            traverseHelper.transform.position.z = traverseHelper.transform.position.z + (deltaZ > 0 and 1 or -1)
             if posUpdate then
                 posUpdate(traverseHelper.transform.position, area, context)
             end

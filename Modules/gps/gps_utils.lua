@@ -77,7 +77,7 @@ function gpsUtils.getTurtleFacing()
     return facing
 end
 
-function turnToFacing(current, target)
+function gpsUtils.turnToFacing(current, target)
     if current == target then
         return
     end
@@ -91,6 +91,12 @@ function turnToFacing(current, target)
             turtle.turnRight()
         end
     end
+end
+
+function gpsUtils.faceEast()
+    local facing = gpsUtils.getTurtleFacing()
+    gpsUtils.turnToFacing(facing, 2)
+    return true
 end
 
 return gpsUtils
