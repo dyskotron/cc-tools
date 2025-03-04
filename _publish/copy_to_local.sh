@@ -3,7 +3,7 @@
 # Define the source directory
 SOURCE_DIR="/Users/matejosanec/IdeaProjects/cctToolbox"
 # Define the parent directory of the destination
-DEST_PARENT_DIR="/Users/matejosanec/Documents/curseforge/minecraft/Instances/Prominence II RPG_ Hasturian Era/saves/ComputerCraft tests/computercraft/computer"
+DEST_PARENT_DIR="/Users/matejosanec/Documents/curseforge/minecraft/Instances/Prominence II RPG_ Hasturian Era/saves/CC TOOLS TEST/computercraft/computer"
 
 # Check if the source directory exists
 if [ ! -d "$SOURCE_DIR" ]; then

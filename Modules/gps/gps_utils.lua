@@ -1,3 +1,5 @@
+traverseHelper = require("Modules.traverseHelper")
+
 local gpsUtils = {}
 
 function gpsUtils.globalToLocal(globalPos, origin)
@@ -45,8 +47,8 @@ function gpsUtils.getTurtleFacing()
     end
 
     -- Move forward to determine direction
-    if not turtle.forward() then
-        print("Turtle cannot move forward! Check for obstacles.")
+    if not traverseHelper.moveForwardDestructive() then
+        print("gpsUtils.getTurtleFacing() - Turtle cannot move forward! Check for obstacles.")
         return nil
     end
 
@@ -72,7 +74,7 @@ function gpsUtils.getTurtleFacing()
     end
 
     -- Move back to original position
-    turtle.back()
+    traverseHelper.moveForwardDestructive()
 
     return facing
 end
