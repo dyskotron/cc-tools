@@ -72,7 +72,7 @@ function traverseHelper.moveDownDestructive()
     return turtle.down()
 end
 
-function traverseHelper.traverseX(transform, targetX, area, posUpdate, context)
+function traverseHelper.traverseX(transform, targetX, posUpdate, context)
     local deltaX = targetX - transform.position.x
     if deltaX ~= 0 then
         traverseHelper.faceDirection(transform, deltaX > 0 and 0 or 180) -- Face east or west
@@ -80,26 +80,25 @@ function traverseHelper.traverseX(transform, targetX, area, posUpdate, context)
             traverseHelper.moveForwardDestructive()
             transform.position.x = transform.position.x + (deltaX > 0 and 1 or -1)
             if posUpdate then
-                -- posUpdate(traverseHelper.transform.position, area, context)
+                posUpdate(transform, context)
             end
         end
     end
 end
 
-function traverseHelper.traverseY(transform, targetY, area, posUpdate, context)
+function traverseHelper.traverseY(transform, targetY, posUpdate)
     local deltaY = targetY - transform.position.y
     if deltaY ~= 0 then
         for i = 1, math.abs(deltaY) do
             if deltaY > 0 then
                 traverseHelper.moveUpDestructive()
-                print("targetY: " .. targetY .. " dest Y: " .. traverseHelper.transform.position.y .. " deltaY: " .. deltaY)
                 transform.position.y = transform.position.y + 1
             else
                 traverseHelper.moveDownDestructive()
                 transform.position.y = transform.position.y - 1
             end
             if posUpdate then
-                -- posUpdate(traverseHelper.transform.position, area, context)
+                posUpdate(transform)
             end
         end
     end
@@ -113,7 +112,7 @@ function traverseHelper.traverseZ(transform, targetZ, posUpdate)
             traverseHelper.moveForwardDestructive()
             transform.position.z = transform.position.z + (deltaZ > 0 and 1 or -1)
             if posUpdate then
-                --posUpdate(traverseHelper.transform.position, area, context)
+                posUpdate(transform)
             end
         end
     end
@@ -126,39 +125,35 @@ function traverseHelper.traverseTo(transform, destination)
     traverseHelper.traverseY(transform, destination.y, nil, nil)
     print("Arrived at destination: (" .. destination.x .. ", " .. destination.y .. ", " .. destination.z .. ")")
 end
-
-function traverseHelper.traverseArea(start, dest, posUpdate, context)
-    local area = { x = dest.x, y = dest.y, z = dest.z }
-    local current = { x = start.x, y = start.y, z = start.z }
+-- todo give it start, end and current so it can continue wherever it ended
+function traverseHelper.traverseArea(transform, destination, posUpdate)
+    local start = { x = transform.position.x, y = transform.position.y, z = transform.position.z }
     local xReversed = false
     local zReversed = false
 
     -- initial update callback
     if posUpdate then
-        posUpdate(current, area, context)
+        posUpdate(transform)
     end
 
     -- Loop over Y and Z dimensions.
-    for y = start.y, area.y do
-        for z = start.z, area.z do
+    for y = start.y, destination.y do
+        for z = start.z, destination.z do
             -- Determine target x coordinate based on direction
-            local targetX = xReversed and start.x or area.x
-            traverseHelper.traverseX(current.x, targetX, area, posUpdate, context)
-            current.x = targetX;
+            local targetX = xReversed and start.x or destination.x
+            traverseHelper.traverseX(transform, targetX, posUpdate)
 
-            if z < area.z then
+            if z < destination.z then
                 -- Calculate next z using the current position.
-                local nextZ = current.z + (zReversed and -1 or 1)
-                traverseHelper.traverseZ(current.z, nextZ, area, posUpdate, context)
-                current.z = nextZ
+                local nextZ = transform.position.z + (zReversed and -1 or 1)
+                traverseHelper.traverseZ(transform, nextZ, posUpdate)
                 xReversed = not xReversed
             end
         end
 
-        if y < area.y then
-            local nextY = current.y + 1
-            traverseHelper.traverseY(current.y, nextY, area, posUpdate, context)
-            current.y = nextY
+        if y < destination.y then
+            local nextY = transform.position.y + 1
+            traverseHelper.traverseY(transform, nextY, posUpdate)
             -- Reorient based on current direction
             traverseHelper.faceDirection(xReversed and 180 or 0)
             zReversed = not zReversed
@@ -169,11 +164,9 @@ function traverseHelper.traverseArea(start, dest, posUpdate, context)
     print("Traversal complete!")
 
     -- Optionally reset to the starting coordinates.
-    current = traverseY(current, start.y, nil, nil)
-    current = traverseX(current, start.x, nil, nil)
-    current = traverseZ(current, start.z, nil, nil)
-
-    return current
+    traverseHelper.traverseY(transform, start.y, nil, nil)
+    traverseHelper.traverseX(transform, start.x, nil, nil)
+    traverseHelper.traverseZ(transform, start.z, nil, nil)
 end
 
 

@@ -3,7 +3,9 @@ vecUtils = require("Modules.utils.vectorUtils")
 traverseHelper = require("Modules.traverseHelper")
 stringUtils = require("Modules.utils.stringUtils")
 
-
+local function posUpdate(transform)
+    print("POS UPDATE ~ Arrived at destination: (" .. transform.position.x .. ", " .. transform.position.y .. ", " .. transform.position.z .. ")")
+end
 
 local args = {...}
 ystart = -59 -- -59 is bedrock level + 1, lowest the turtle can safely mine
@@ -32,14 +34,14 @@ if gpsUtils.faceEast() then
     traverseHelper.traverseTo(transform, {x=0,y=chunkPos.y,z=0})
     print("after first: " .. transform.rotation)
 
-    traverseHelper.traverseTo(transform, {x=7,y=chunkPos.y -1,z=7})
+    traverseHelper.traverseArea(transform, {x=7,y=chunkPos.y + 2,z=7}, posUpdate)
     print("after second: " .. transform.rotation)
 
     --traverseHelper.traverseTo(relativeTarget)
     --todo: update transform correctly
-    --traverseHelper.faceDirection(0)
+    traverseHelper.faceDirection(transform, 0)
 end
 
 -- print("diggin up")
 
--- traverseHelper.traverseArea(16,height,16)
+traverseHelper.traverseArea(16,height,16)
