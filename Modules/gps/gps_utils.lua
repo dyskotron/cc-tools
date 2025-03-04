@@ -28,6 +28,11 @@ function gpsUtils.nearestChunkOrigin(pos, chunkSize)
     }
 end
 
+function gpsUtils.locate()
+    local x, y, z = gps.locate()
+    return {x=x, y=y, z=z}
+end
+
 function gpsUtils.getChunkPos(pos, chunkSize)
     chunkSize = chunkSize or 16 -- Default chunk size
 
