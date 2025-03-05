@@ -37,6 +37,10 @@ function stringUtils.getSimplifiedName(fullName)
     return simpleName or fullName
 end
 
+function stringUtils.transformToString(transform)
+    return "POS:" .. transform.position.x .. ", " .. transform.position.y .. ", " .. transform.position.z .. " ROT:" .. transform.rotation
+end
+
 function stringUtils.tableToString(value)
 
     if type(value) == "table" then
@@ -44,7 +48,7 @@ function stringUtils.tableToString(value)
         return stringUtils.tableToString_internal(value, 1)
     else
         -- Handle non-table values
-        return "[ERRRROOOOOORRRR] Expected table but got this:" .. tostring(value)
+        return "[ERROR] stringUtils.tableToString - Expected table but got this:" .. tostring(value)
     end
 end
 

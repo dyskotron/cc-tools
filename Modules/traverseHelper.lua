@@ -32,7 +32,8 @@ function traverseHelper.faceDirection(transform, targetDirection)
     if diff == 90 then
         turtle.turnRight()
     elseif diff == 180 then
-        turtle.turnRight(2)
+        turtle.turnRight()
+        turtle.turnRight()
     elseif diff == 270 then
         turtle.turnLeft()
     end
@@ -43,11 +44,13 @@ function traverseHelper.moveBackDestructive()
     if(turtle.back()) then
         return true
     end
-    turtle.turnLeft(2)
+    turtle.turnLeft()
+    turtle.turnLeft()
     while turtle.detect() do
         turtle.dig()
     end
-    turtle.turnRight(2)
+    turtle.turnRight()
+    turtle.turnRight()
     return turtle.back()
 end
 
@@ -119,17 +122,18 @@ function traverseHelper.traverseZ(transform, targetZ, posUpdate)
 end
 
 function traverseHelper.traverseTo(transform, destination)
-    print("traverseHelper.traverseTo. current: (" .. transform.position.x .. ",  " .. transform.position.y .. ","  .. transform.position.z .. ")")
     traverseHelper.traverseZ(transform, destination.z, nil, nil)
     traverseHelper.traverseX(transform, destination.x, nil, nil)
     traverseHelper.traverseY(transform, destination.y, nil, nil)
-    print("Arrived at destination: (" .. destination.x .. ", " .. destination.y .. ", " .. destination.z .. ")")
 end
+
 -- todo give it start, end and current so it can continue wherever it ended
 function traverseHelper.traverseArea(transform, destination, posUpdate)
     local start = { x = transform.position.x, y = transform.position.y, z = transform.position.z }
     local xReversed = false
     local zReversed = false
+
+    traverseHelper.faceDirection(transform, xReversed and 180 or 0)
 
     -- initial update callback
     if posUpdate then
@@ -155,7 +159,7 @@ function traverseHelper.traverseArea(transform, destination, posUpdate)
             local nextY = transform.position.y + 1
             traverseHelper.traverseY(transform, nextY, posUpdate)
             -- Reorient based on current direction
-            traverseHelper.faceDirection(xReversed and 180 or 0)
+            traverseHelper.faceDirection(transform, xReversed and 180 or 0)
             zReversed = not zReversed
             xReversed = not xReversed
         end

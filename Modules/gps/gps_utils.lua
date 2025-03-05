@@ -79,7 +79,7 @@ function gpsUtils.getTurtleFacing()
     end
 
     -- Move back to original position
-    traverseHelper.moveForwardDestructive()
+    turtle.back()
 
     return facing
 end
