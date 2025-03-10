@@ -7,8 +7,8 @@ local function posUpdate(transform)
     local x = transform.position.x
     local z = transform.position.z
     if(x == -1 or x == 16 or z == -1 or z == 16) then
-        turtle.digDown()
-        turtle.placeDown()
+        --turtle.digDown()
+        --turtle.placeDown()
     end
 end
 
@@ -16,12 +16,10 @@ local args = {...}
 ystart = -59 -- -59 is bedrock level + 1, lowest the turtle can safely mine
 
 if #args == 2 then
-    height = tonumber(args[1])
-    ystart = tonumber(args[2])
-elseif #args == 1 then
-     height = tonumber(args[1])
+    yStart = tonumber(args[1])
+    yTarget = tonumber(args[2])
 else
-    print("Invalid params! Use: minechunk <targetY>")
+    print("Invalid params! Use: minechunk <Y start> <Y end>")
 
     return
 end
@@ -36,16 +34,15 @@ if gpsUtils.faceEast() then
 
     print("Init rotation: " .. transform.rotation)
 
-    traverseHelper.traverseTo(transform, {x=-1, y=startY-1, z=-1})
-    --traverseHelper.traverseTo(transform, {x=2, y=startY + 8, z=2})
-    --traverseHelper.traverseTo(transform, {x=3, y=startY - 1, z=1})
-    --traverseHelper.traverseTo(transform, {x=7, y=startY + 5, z=1})
-    --traverseHelper.traverseTo(transform, {x=0, y=startY, z=0})
-    --traverseHelper.faceDirection(transform, 90)
+    -- wall around
+    -- traverseHelper.traverseTo(transform, {x=-1, y=ystart, z=-1})
+    -- traverseHelper.traverseArea(transform, {x=16,y=startY + 5, z=16}, posUpdate)
 
-    traverseHelper.traverseArea(transform, {x=16,y=startY + 5, z=16}, posUpdate)
-    traverseHelper.traverseTo(transform, {x=0, y=startY, z=0})
-    traverseHelper.faceDirection(transform, 90)
+    traverseHelper.traverseTo(transform, {x=0, y=yStart, z=0})
+    traverseHelper.traverseArea(transform, {x=15,y=yTarget, z=15}, posUpdate)
+
+    --traverseHelper.traverseTo(transform, {x=0, y=startY, z=0})
+    -- traverseHelper.faceDirection(transform, 0)
 end
 
 -- print("diggin up")

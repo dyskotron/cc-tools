@@ -133,7 +133,7 @@ function traverseHelper.traverseArea(transform, destination, posUpdate)
     local xReversed = false
     local zReversed = false
 
-    traverseHelper.faceDirection(transform, xReversed and 180 or 0)
+    traverseHelper.faceDirection(transform, 0)
 
     -- initial update callback
     if posUpdate then
