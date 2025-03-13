@@ -2,8 +2,20 @@ gpsUtils = require("Modules.gps.gps_utils")
 vecUtils = require("Modules.utils.vectorUtils")
 traverseHelper = require("Modules.traverseHelper")
 stringUtils = require("Modules.utils.stringUtils")
+textFileUtil = require("Modules.utils.textFileUtil")
+
+stepCounter = 0
 
 local function posUpdate(transform)
+
+    stepCounter = stepCounter + 1
+    if stepCounter % 1000 == 0 then
+        if turtle.getFuelLevel() < 1000 then
+            print("Fuel low (" .. turtle.getFuelLevel() .. "), refueling...")
+            turtle.refuel()
+        end
+    end
+
     local x = transform.position.x
     local z = transform.position.z
     if(x == -1 or x == 16 or z == -1 or z == 16) then
@@ -13,15 +25,14 @@ local function posUpdate(transform)
 end
 
 local args = {...}
-ystart = -59 -- -59 is bedrock level + 1, lowest the turtle can safely mine
 
 if #args == 2 then
     yStart = tonumber(args[1])
     yTarget = tonumber(args[2])
+elseif #args == 1 then
+    yTarget = tonumber(args[1])
 else
-    print("Invalid params! Use: minechunk <Y start> <Y end>")
-
-    return
+    yTarget = -59 -- -59 is bedrock level + 1, lowest the turtle can safely mine
 end
 
 print("Moving to chunk origin")
@@ -29,8 +40,12 @@ print("Moving to chunk origin")
 if gpsUtils.faceEast() then
     local globalPos = gpsUtils.locate()
     local chunkPos = gpsUtils.getChunkPos(globalPos)
-    local startY = chunkPos.y
+    if(yStart == nil) then
+        yStart = chunkPos.y
+    end
     local transform = { position = {x=chunkPos.x, y=chunkPos.y, z=chunkPos.z}, rotation = 0 }
+
+    textFileUtil.writeToFile("startupAction", "minechunk " .. yTarget)
 
     print("Init rotation: " .. transform.rotation)
 
@@ -44,6 +59,3 @@ if gpsUtils.faceEast() then
     --traverseHelper.traverseTo(transform, {x=0, y=startY, z=0})
     -- traverseHelper.faceDirection(transform, 0)
 end
-
--- print("diggin up")
--- traverseHelper.traverseArea(16,height,16)

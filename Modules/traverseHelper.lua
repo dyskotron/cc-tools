@@ -127,7 +127,6 @@ function traverseHelper.traverseTo(transform, destination)
     traverseHelper.traverseY(transform, destination.y, nil, nil)
 end
 
--- todo give it start, end and current so it can continue wherever it ended
 function traverseHelper.traverseArea(transform, destination, posUpdate)
     local start = { x = transform.position.x, y = transform.position.y, z = transform.position.z }
     local xReversed = false
@@ -140,8 +139,10 @@ function traverseHelper.traverseArea(transform, destination, posUpdate)
         posUpdate(transform)
     end
 
-    -- Loop over Y and Z dimensions.
-    for y = start.y, destination.y do
+    local yStep = destination.y >= start.y and 1 or -1
+
+    -- Loop over Y using the appropriate step.
+    for y = start.y, destination.y, yStep do
         for z = start.z, destination.z do
             -- Determine target x coordinate based on direction
             local targetX = xReversed and start.x or destination.x
@@ -155,8 +156,8 @@ function traverseHelper.traverseArea(transform, destination, posUpdate)
             end
         end
 
-        if y < destination.y then
-            local nextY = transform.position.y + 1
+        if y ~= destination.y then
+            local nextY = transform.position.y + yStep
             traverseHelper.traverseY(transform, nextY, posUpdate)
             -- Reorient based on current direction
             traverseHelper.faceDirection(transform, xReversed and 180 or 0)
@@ -168,10 +169,9 @@ function traverseHelper.traverseArea(transform, destination, posUpdate)
     print("Traversal complete!")
 
     -- Optionally reset to the starting coordinates.
-    traverseHelper.traverseY(transform, start.y, nil, nil)
-    traverseHelper.traverseX(transform, start.x, nil, nil)
-    traverseHelper.traverseZ(transform, start.z, nil, nil)
+    traverseHelper.traverseY(transform, start.y, nil)
+    traverseHelper.traverseX(transform, start.x, nil)
+    traverseHelper.traverseZ(transform, start.z, nil)
 end
-
 
 return traverseHelper
