@@ -3,7 +3,8 @@ local inventoryWrapper = require("Modules.InventoryWrapper")
 local colorUtils = require("Modules.utils.colorUtils")
 local ColorMapper = {}
 
--- Map color indices to materials in the turtle's inventory
+-- Map color indices to materials in the turtle's inventory - actualy pecificely magica foxel file colors
+-- color mapping using color definition
 function ColorMapper.getDisplayedColors(filename)
 
     local file = fs.open(filename, "rb")
@@ -62,6 +63,7 @@ function ColorMapper.getDisplayedColors(filename)
     return displayedColors
 end
 
+-- color mapping using color definition
 function ColorMapper.getColorToMaterialMap(usedColors)
     inventoryWrapper.init()
 
