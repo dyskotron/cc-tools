@@ -37,6 +37,8 @@ end
 
 print("Moving to chunk origin")
 
+startupSource = "startupAction"
+
 if gpsUtils.faceEast() then
     local globalPos = gpsUtils.locate()
     local chunkPos = gpsUtils.getChunkPos(globalPos)
@@ -45,9 +47,7 @@ if gpsUtils.faceEast() then
     end
     local transform = { position = {x=chunkPos.x, y=chunkPos.y, z=chunkPos.z}, rotation = 0 }
 
-    textFileUtil.writeToFile("startupAction", "minechunk " .. yTarget)
-
-    print("Init rotation: " .. transform.rotation)
+    textFileUtil.writeToFile(startupSource, "minechunk " .. yTarget)
 
     -- wall around
     -- traverseHelper.traverseTo(transform, {x=-1, y=ystart, z=-1})
@@ -58,4 +58,8 @@ if gpsUtils.faceEast() then
 
     --traverseHelper.traverseTo(transform, {x=0, y=startY, z=0})
     -- traverseHelper.faceDirection(transform, 0)
+
+    print("Minechunk done")
+    fs.delete(startupSource)
+
 end

@@ -1,10 +1,10 @@
 local textFileUtil = {}
 
 function textFileUtil.writeToFile(filePath, content)
-    fileHandle = fs.open(filePath, "a")
+    fileHandle = fs.open(filePath, "w")
 
     if not fileHandle then
-        error("Failed to open log file: " .. filePath)
+        error("Failed to open file: " .. filePath)
     end
 
     fileHandle.write(content)
